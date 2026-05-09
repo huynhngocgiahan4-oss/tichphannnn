@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tích Phân Trực Quan</title>
+<title>Tích Phân Trực Quan Pro - Giải Tích 12</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- Tích hợp Math.js cho đạo hàm và parse hàm số an toàn -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
 <style>
   :root {
     --bg: #0d0f14;
@@ -23,728 +25,306 @@
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--text);font-family:'Be Vietnam Pro',sans-serif;min-height:100vh;overflow-x:hidden}
 
-  /* Background grid */
   body::before{
     content:'';position:fixed;inset:0;
     background-image:linear-gradient(rgba(108,99,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(108,99,255,0.03) 1px,transparent 1px);
     background-size:48px 48px;pointer-events:none;z-index:0
   }
 
-  .wrap{max-width:960px;margin:0 auto;padding:40px 20px;position:relative;z-index:1}
+  .wrap{max-width:1000px;margin:0 auto;padding:40px 20px;position:relative;z-index:1}
 
-  /* Header */
   header{text-align:center;margin-bottom:48px}
   .badge{display:inline-block;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent2);background:rgba(0,229,176,0.1);border:1px solid rgba(0,229,176,0.2);padding:5px 14px;border-radius:100px;margin-bottom:20px}
-  h1{font-family:'DM Serif Display',serif;font-size:clamp(36px,6vw,64px);line-height:1.05;background:linear-gradient(135deg,#fff 0%,#a8a8ff 50%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px}
+  h1{font-family:'DM Serif Display',serif;font-size:clamp(32px,5vw,56px);line-height:1.05;background:linear-gradient(135deg,#fff 0%,#a8a8ff 50%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px}
   .subtitle{color:var(--muted);font-size:15px;font-weight:300;letter-spacing:0.3px}
 
-  /* Tab bar */
   .tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:5px;margin-bottom:32px;flex-wrap:wrap}
-  .tab{flex:1;min-width:120px;padding:10px 16px;border:none;background:transparent;color:var(--muted);font-family:'Be Vietnam Pro',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border-radius:9px;transition:all .2s;white-space:nowrap;text-align:center}
+  .tab{flex:1;min-width:140px;padding:10px 12px;border:none;background:transparent;color:var(--muted);font-family:'Be Vietnam Pro',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border-radius:9px;transition:all .2s;white-space:nowrap;text-align:center}
   .tab:hover{color:var(--text);background:var(--surface2)}
   .tab.active{background:linear-gradient(135deg,var(--accent),#8b83ff);color:#fff;box-shadow:0 4px 16px rgba(108,99,255,0.35)}
 
-  /* Panel */
   .panel{display:none}.panel.active{display:block}
 
-  /* Input grid */
-  .input-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px}
+  .input-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
   .field{display:flex;flex-direction:column;gap:6px}
-  .field label{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace}
+  .field label{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace}
   .field input{background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'DM Mono',monospace;font-size:14px;outline:none;transition:border .2s}
   .field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,0.15)}
-  .field input.err{border-color:var(--accent3);box-shadow:0 0 0 3px rgba(255,107,107,0.15)}
 
-  /* Slider row */
-  .slider-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-  .slider-row label{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;min-width:80px}
-  .slider-row input[type=range]{flex:1;accent-color:var(--accent);height:4px}
-  .slider-row .sval{font-size:13px;font-family:'DM Mono',monospace;color:var(--accent2);min-width:36px;text-align:right}
-
-  /* Action row */
   .actions{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
   .btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:9px;font-family:'Be Vietnam Pro',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;white-space:nowrap}
   .btn-primary{background:linear-gradient(135deg,var(--accent),#8b83ff);color:#fff;box-shadow:0 4px 14px rgba(108,99,255,0.4)}
   .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(108,99,255,0.5)}
-  .btn-primary:active{transform:scale(0.98)}
-  .btn-outline{background:transparent;border:1px solid var(--border2);color:var(--muted)}
-  .btn-outline:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
   .btn-export{background:rgba(0,229,176,0.1);border:1px solid rgba(0,229,176,0.25);color:var(--accent2)}
-  .btn-export:hover{background:rgba(0,229,176,0.18)}
 
-  /* Canvas wrapper */
   .canvas-wrap{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px}
   .canvas-wrap canvas{display:block;width:100%;height:auto}
   .canvas-label{position:absolute;top:12px;left:14px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
 
-  /* Result cards */
-  .result-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+  .result-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px}
   .rcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
   .rcard .rlabel{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
-  .rcard .rval{font-size:22px;font-weight:600;font-family:'DM Mono',monospace;color:var(--text)}
-  .rcard .runit{font-size:12px;color:var(--muted);margin-top:2px}
+  .rcard .rval{font-size:20px;font-weight:600;font-family:'DM Mono',monospace;color:var(--text)}
   .rcard.accent{border-color:rgba(108,99,255,0.3);background:rgba(108,99,255,0.07)}
   .rcard.accent .rval{color:var(--accent2)}
 
-  /* Formula display */
   .formula-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:20px;font-family:'DM Mono',monospace;font-size:13px;color:var(--muted);line-height:1.7}
   .formula-box span{color:var(--accent2)}
 
-  /* Error msg */
   .errmsg{background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.25);color:#ff9999;border-radius:9px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
   .errmsg.show{display:block}
 
-  /* How to section */
-  .howto{margin-top:56px;border-top:1px solid var(--border);padding-top:40px}
-  .howto h2{font-family:'DM Serif Display',serif;font-size:28px;margin-bottom:24px;color:var(--text)}
-  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
-  .step{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
-  .step-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:2px;margin-bottom:8px}
-  .step h3{font-size:15px;font-weight:600;margin-bottom:6px}
-  .step p{font-size:13px;color:var(--muted);line-height:1.6}
-  .step code{font-family:'DM Mono',monospace;font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:4px;color:var(--accent2)}
-
   footer{margin-top:60px;text-align:center;font-size:12px;color:var(--muted);padding-bottom:40px}
-  footer a{color:var(--accent);text-decoration:none}
 </style>
 </head>
 <body>
 <div class="wrap">
-
   <header>
-    <div class="badge">Công cụ học tập</div>
-    <h1>Tích Phân<br><em>Trực Quan</em></h1>
-    <p class="subtitle">Nhập hàm số — xem ngay diện tích & thể tích</p>
+    <div class="badge">Công cụ học tập nâng cao</div>
+    <h1>Ứng dụng Tích phân<br><em>Đa Năng</em></h1>
+    <p class="subtitle">Tính toán & Trực quan hóa mọi bài toán Giải tích</p>
   </header>
 
-  <!-- TABS -->
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('t1',this)">📐 Diện tích 1 hàm</button>
-    <button class="tab" onclick="switchTab('t2',this)">📊 Diện tích 2 hàm</button>
-    <button class="tab" onclick="switchTab('t3',this)">🔵 Thể tích tròn xoay</button>
+    <button class="tab active" onclick="switchTab('t1',this)">📐 Diện tích</button>
+    <button class="tab" onclick="switchTab('t2',this)">📏 Độ dài cung</button>
+    <button class="tab" onclick="switchTab('t3',this)">🔵 Xoay Ox (Đĩa)</button>
+    <button class="tab" onclick="switchTab('t4',this)">🌀 Xoay Oy (Vỏ)</button>
+    <button class="tab" onclick="switchTab('t5',this)">🏺 Diện tích mặt</button>
   </div>
 
-  <!-- ===== TAB 1: DIỆN TÍCH 1 HÀM ===== -->
+  <!-- TAB 1: DIỆN TÍCH -->
   <div id="t1" class="panel active">
-    <div class="formula-box">
-      S = <span>∫ₐᵇ f(x) dx</span>
-    </div>
+    <div class="formula-box">S = <span>∫ₐᵇ |f(x)| dx</span></div>
     <div id="err1" class="errmsg"></div>
     <div class="input-grid">
-      <div class="field">
-        <label>f(x) =</label>
-        <input id="f1" value="x^2 - 2*x + 1" placeholder="vd: sin(x), x^2, sqrt(x)">
-      </div>
-      <div class="field">
-        <label>Cận dưới a</label>
-        <input id="a1" type="number" value="0" step="0.5">
-      </div>
-      <div class="field">
-        <label>Cận trên b</label>
-        <input id="b1" type="number" value="3" step="0.5">
-      </div>
-    </div>
-    <div class="slider-row">
-      <label>Số HCN n</label>
-      <input type="range" id="n1" min="2" max="100" value="30" oninput="document.getElementById('nv1').textContent=this.value;draw1()">
-      <span class="sval" id="nv1">30</span>
+      <div class="field"><label>f(x)</label><input id="f1" value="x^2 - 2x"></div>
+      <div class="field"><label>Cận a</label><input id="a1" type="number" value="0"></div>
+      <div class="field"><label>Cận b</label><input id="b1" type="number" value="3"></div>
     </div>
     <div class="actions">
-      <button class="btn btn-primary" onclick="draw1()">▶ Vẽ đồ thị</button>
-      <button class="btn btn-export" onclick="exportPNG('c1','dientich_1ham')">⬇ Xuất PNG</button>
+      <button class="btn btn-primary" onclick="draw(1)">▶ Thực hiện</button>
+      <button class="btn btn-export" onclick="exportPNG('c1')">⬇ Lưu ảnh</button>
     </div>
-    <div class="canvas-wrap">
-      <span class="canvas-label">Riemann Sum</span>
-      <canvas id="c1" width="880" height="440"></canvas>
-    </div>
+    <div class="canvas-wrap"><canvas id="c1" width="880" height="400"></canvas></div>
     <div class="result-cards">
-      <div class="rcard accent">
-        <div class="rlabel">Xấp xỉ (Riemann)</div>
-        <div class="rval" id="r1approx">—</div>
-        <div class="runit">đơn vị diện tích²</div>
-      </div>
-      <div class="rcard">
-        <div class="rlabel">Chính xác</div>
-        <div class="rval" id="r1exact">—</div>
-        <div class="runit">đơn vị diện tích²</div>
-      </div>
-      <div class="rcard">
-        <div class="rlabel">Sai số</div>
-        <div class="rval" id="r1err">—</div>
-        <div class="runit">tuyệt đối</div>
-      </div>
+      <div class="rcard accent"><div class="rlabel">Diện tích S</div><div class="rval" id="r1s">—</div></div>
     </div>
   </div>
 
-  <!-- ===== TAB 2: DIỆN TÍCH 2 HÀM ===== -->
+  <!-- TAB 2: ĐỘ DÀI CUNG -->
   <div id="t2" class="panel">
-    <div class="formula-box">
-      S = <span>∫ₐᵇ |f(x) − g(x)| dx</span>
-    </div>
+    <div class="formula-box">L = <span>∫ₐᵇ √(1 + [f'(x)]²) dx</span></div>
     <div id="err2" class="errmsg"></div>
     <div class="input-grid">
-      <div class="field">
-        <label>f(x) = (hàm trên)</label>
-        <input id="f2" value="sin(x) + 2" placeholder="vd: sin(x)+2">
-      </div>
-      <div class="field">
-        <label>g(x) = (hàm dưới)</label>
-        <input id="g2" value="x/2" placeholder="vd: x/2">
-      </div>
-      <div class="field">
-        <label>Cận dưới a</label>
-        <input id="a2" type="number" value="0" step="0.5">
-      </div>
-      <div class="field">
-        <label>Cận trên b</label>
-        <input id="b2" type="number" value="3" step="0.5">
-      </div>
+      <div class="field"><label>f(x)</label><input id="f2" value="x^(3/2)"></div>
+      <div class="field"><label>Cận a</label><input id="a2" type="number" value="0"></div>
+      <div class="field"><label>Cận b</label><input id="b2" type="number" value="4"></div>
     </div>
     <div class="actions">
-      <button class="btn btn-primary" onclick="draw2()">▶ Vẽ đồ thị</button>
-      <button class="btn btn-export" onclick="exportPNG('c2','dientich_2ham')">⬇ Xuất PNG</button>
+      <button class="btn btn-primary" onclick="draw(2)">▶ Thực hiện</button>
     </div>
-    <div class="canvas-wrap">
-      <span class="canvas-label">Diện tích giữa 2 đường</span>
-      <canvas id="c2" width="880" height="440"></canvas>
-    </div>
+    <div class="canvas-wrap"><canvas id="c2" width="880" height="400"></canvas></div>
     <div class="result-cards">
-      <div class="rcard accent">
-        <div class="rlabel">Diện tích S</div>
-        <div class="rval" id="r2s">—</div>
-        <div class="runit">đơn vị diện tích²</div>
-      </div>
-      <div class="rcard">
-        <div class="rlabel">f(a)</div>
-        <div class="rval" id="r2fa">—</div>
-      </div>
-      <div class="rcard">
-        <div class="rlabel">f(b)</div>
-        <div class="rval" id="r2fb">—</div>
-      </div>
+      <div class="rcard accent"><div class="rlabel">Độ dài L</div><div class="rval" id="r2l">—</div></div>
+      <div class="rcard"><div class="rlabel">Đạo hàm f'(x)</div><div class="rval" id="r2df" style="font-size:14px">—</div></div>
     </div>
   </div>
 
-  <!-- ===== TAB 3: THỂ TÍCH ===== -->
+  <!-- TAB 3: XOAY OX (MẶT CẮT ĐĨA) -->
   <div id="t3" class="panel">
-    <div class="formula-box">
-      V = <span>π ∫ₐᵇ [f(x)]² dx</span>
-      &nbsp;(xoay quanh trục Ox)
-    </div>
-    <div id="err3" class="errmsg"></div>
+    <div class="formula-box">V = <span>π ∫ₐᵇ [f(x)]² dx</span></div>
     <div class="input-grid">
-      <div class="field">
-        <label>f(x) =</label>
-        <input id="f3" value="sqrt(x)" placeholder="vd: sqrt(x), sin(x)">
-      </div>
-      <div class="field">
-        <label>Cận dưới a</label>
-        <input id="a3" type="number" value="0" step="0.5">
-      </div>
-      <div class="field">
-        <label>Cận trên b</label>
-        <input id="b3" type="number" value="4" step="0.5">
-      </div>
+      <div class="field"><label>f(x)</label><input id="f3" value="sqrt(x)"></div>
+      <div class="field"><label>Cận a</label><input id="a3" type="number" value="0"></div>
+      <div class="field"><label>Cận b</label><input id="b3" type="number" value="4"></div>
     </div>
-    <div class="actions">
-      <button class="btn btn-primary" onclick="draw3()">▶ Vẽ đồ thị</button>
-      <button class="btn btn-export" onclick="exportPNG('c3','thetich_tronxoay')">⬇ Xuất PNG</button>
-    </div>
-    <div class="canvas-wrap">
-      <span class="canvas-label">Khối tròn xoay</span>
-      <canvas id="c3" width="880" height="460"></canvas>
-    </div>
+    <div class="actions"><button class="btn btn-primary" onclick="draw(3)">▶ Thực hiện</button></div>
+    <div class="canvas-wrap"><canvas id="c3" width="880" height="400"></canvas></div>
     <div class="result-cards">
-      <div class="rcard accent">
-        <div class="rlabel">Thể tích V</div>
-        <div class="rval" id="r3v">—</div>
-        <div class="runit">× π đvtt³</div>
-      </div>
-      <div class="rcard">
-        <div class="rlabel">V (số thực)</div>
-        <div class="rval" id="r3vr">—</div>
-        <div class="runit">đơn vị thể tích³</div>
-      </div>
-      <div class="rcard">
-        <div class="rlabel">Bán kính max</div>
-        <div class="rval" id="r3rmax">—</div>
-        <div class="runit">đơn vị</div>
-      </div>
+      <div class="rcard accent"><div class="rlabel">Thể tích V</div><div class="rval" id="r3v">—</div></div>
     </div>
   </div>
 
-  <!-- HOW TO USE -->
-  <div class="howto">
-    <h2>Cách nhập hàm số</h2>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">01 — CƠ BẢN</div>
-        <h3>Phép tính</h3>
-        <p><code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>^</code> (lũy thừa)<br>Ví dụ: <code>x^2 + 3*x - 1</code></p>
-      </div>
-      <div class="step">
-        <div class="step-num">02 — HÀM SỐ</div>
-        <h3>Hàm lượng giác & khác</h3>
-        <p><code>sin(x)</code> <code>cos(x)</code> <code>tan(x)</code><br><code>sqrt(x)</code> <code>abs(x)</code> <code>log(x)</code> <code>exp(x)</code></p>
-      </div>
-      <div class="step">
-        <div class="step-num">03 — HẰNG SỐ</div>
-        <h3>Pi và e</h3>
-        <p><code>PI</code> hoặc <code>pi</code> = π ≈ 3.14159<br><code>E</code> hoặc <code>e</code> = 2.71828</p>
-      </div>
-      <div class="step">
-        <div class="step-num">04 — VÍ DỤ</div>
-        <h3>Thử ngay</h3>
-        <p><code>x^3 - 3*x</code><br><code>2*sin(x)*cos(x)</code><br><code>1/(1+x^2)</code></p>
-      </div>
+  <!-- TAB 4: XOAY OY (VỎ TRỤ) -->
+  <div id="t4" class="panel">
+    <div class="formula-box">V = <span>2π ∫ₐᵇ x |f(x)| dx</span></div>
+    <div class="input-grid">
+      <div class="field"><label>f(x)</label><input id="f4" value="sin(x)"></div>
+      <div class="field"><label>Cận a</label><input id="a4" type="number" value="0"></div>
+      <div class="field"><label>Cận b</label><input id="b4" type="number" value="3.14"></div>
+    </div>
+    <div class="actions"><button class="btn btn-primary" onclick="draw(4)">▶ Thực hiện</button></div>
+    <div class="canvas-wrap"><canvas id="c4" width="880" height="400"></canvas></div>
+    <div class="result-cards">
+      <div class="rcard accent"><div class="rlabel">Thể tích V</div><div class="rval" id="r4v">—</div></div>
     </div>
   </div>
 
-  <!-- DEPLOY GUIDE -->
-  <div class="howto">
-    <h2>🚀 Deploy lên GitHub Pages</h2>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">BƯỚC 01</div>
-        <h3>Tạo GitHub repo</h3>
-        <p>Vào <a href="https://github.com" target="_blank" style="color:var(--accent)">github.com</a> → New repository → Đặt tên (vd: <code>tich-phan</code>) → Create</p>
-      </div>
-      <div class="step">
-        <div class="step-num">BƯỚC 02</div>
-        <h3>Upload file</h3>
-        <p>Vào repo → Add file → Upload files → Kéo thả file <code>index.html</code> → Commit changes</p>
-      </div>
-      <div class="step">
-        <div class="step-num">BƯỚC 03</div>
-        <h3>Bật GitHub Pages</h3>
-        <p>Settings → Pages → Source: <code>main branch</code> → Save. Chờ ~1 phút là có link!</p>
-      </div>
-      <div class="step">
-        <div class="step-num">BƯỚC 04</div>
-        <h3>Chia sẻ link</h3>
-        <p>Link có dạng:<br><code>username.github.io/tich-phan</code><br>Gửi cho học sinh là xong! 🎉</p>
-      </div>
+  <!-- TAB 5: DIỆN TÍCH MẶT TRÒN XOAY -->
+  <div id="t5" class="panel">
+    <div class="formula-box">S = <span>2π ∫ₐᵇ |f(x)| √(1 + [f'(x)]²) dx</span></div>
+    <div class="input-grid">
+      <div class="field"><label>f(x)</label><input id="f5" value="sqrt(4-x^2)"></div>
+      <div class="field"><label>Cận a</label><input id="a5" type="number" value="-2"></div>
+      <div class="field"><label>Cận b</label><input id="b5" type="number" value="2"></div>
+    </div>
+    <div class="actions"><button class="btn btn-primary" onclick="draw(5)">▶ Thực hiện</button></div>
+    <div class="canvas-wrap"><canvas id="c5" width="880" height="400"></canvas></div>
+    <div class="result-cards">
+      <div class="rcard accent"><div class="rlabel">Diện tích mặt S</div><div class="rval" id="r5s">—</div></div>
     </div>
   </div>
 
-  <footer>
-    Tích Phân Trực Quan — Tạo bởi câu lạc bộ Toán &nbsp;·&nbsp; <a href="https://github.com" target="_blank">GitHub Pages</a>
-  </footer>
+  <footer>Tích Phân Đa Năng v2.0 - Tích hợp Math.js</footer>
 </div>
 
 <script>
-// ===== MATH PARSER =====
-function parseFn(expr) {
-  try {
-    let e = expr.trim()
-      .replace(/\^/g, '**')
-      .replace(/\bsin\b/g, 'Math.sin')
-      .replace(/\bcos\b/g, 'Math.cos')
-      .replace(/\btan\b/g, 'Math.tan')
-      .replace(/\bsqrt\b/g, 'Math.sqrt')
-      .replace(/\babs\b/g, 'Math.abs')
-      .replace(/\blog\b/g, 'Math.log')
-      .replace(/\bexp\b/g, 'Math.exp')
-      .replace(/\bln\b/g, 'Math.log')
-      .replace(/\bPI\b/g, 'Math.PI')
-      .replace(/\bpi\b/g, 'Math.PI')
-      .replace(/\bE\b/g, 'Math.E');
-    const fn = new Function('x', '"use strict"; return ' + e);
-    fn(1); // test
-    return fn;
-  } catch(err) {
-    return null;
-  }
+const parser = math.parser();
+
+function evaluateFn(expr, xVal) {
+  try { return math.evaluate(expr, { x: xVal }); } catch { return NaN; }
 }
 
-function integrate(f, a, b, N=2000) {
-  const dx = (b - a) / N;
-  let s = 0;
-  for (let i = 0; i < N; i++) s += f(a + (i + 0.5) * dx) * dx;
-  return s;
+function getDerivativeStr(expr) {
+  try { return math.derivative(expr, 'x').toString(); } catch { return "N/A"; }
 }
 
-function riemannLeft(f, a, b, n) {
-  const dx = (b - a) / n;
-  let s = 0;
-  for (let i = 0; i < n; i++) s += f(a + i * dx) * dx;
-  return s;
+function integrate(fnExpr, a, b, steps = 1000) {
+  let area = 0;
+  const dx = (b - a) / steps;
+  for (let i = 0; i < steps; i++) {
+    let x = a + (i + 0.5) * dx;
+    let y = math.evaluate(fnExpr, { x: x });
+    area += Math.abs(y) * dx;
+  }
+  return area;
 }
 
-// ===== CANVAS HELPERS =====
-function setupCtx(id) {
-  const c = document.getElementById(id);
-  const W = 880, H = c.height;
-  c.width = W; c.height = H;
-  const ctx = c.getContext('2d');
-  return { ctx, W, H, c };
-}
-
-function getRange(f, a, b, steps=200) {
-  let mn = Infinity, mx = -Infinity;
-  for (let i = 0; i <= steps; i++) {
-    const x = a + i / steps * (b - a);
-    const y = f(x);
-    if (isFinite(y)) { mn = Math.min(mn, y); mx = Math.max(mx, y); }
-  }
-  return { mn, mx };
-}
-
-function makeTransform(W, H, xMin, xMax, yMin, yMax, pad) {
-  const pw = pad, ph = pad;
-  const scX = (W - pw * 2) / (xMax - xMin);
-  const scY = (H - ph * 2) / (yMax - yMin);
-  return {
-    tx: x => pw + (x - xMin) * scX,
-    ty: y => H - ph - (y - yMin) * scY,
-    scX, scY, xMin, xMax, yMin, yMax, W, H, pw, ph
-  };
-}
-
-function drawAxesGrid(ctx, T) {
-  const { tx, ty, xMin, xMax, yMin, yMax, W, H, pw } = T;
-
-  // Grid
-  ctx.strokeStyle = 'rgba(108,99,255,0.08)';
-  ctx.lineWidth = 0.5;
-  const xStep = niceStep(xMax - xMin, 8);
-  const yStep = niceStep(yMax - yMin, 6);
-  for (let x = Math.ceil(xMin / xStep) * xStep; x <= xMax; x += xStep) {
-    const px = tx(x); ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H); ctx.stroke();
-  }
-  for (let y = Math.ceil(yMin / yStep) * yStep; y <= yMax; y += yStep) {
-    const py = ty(y); ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(W, py); ctx.stroke();
-  }
-
-  // Axes
-  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-  ctx.lineWidth = 1;
-  if (yMin <= 0 && yMax >= 0) {
-    ctx.beginPath(); ctx.moveTo(0, ty(0)); ctx.lineTo(W, ty(0)); ctx.stroke();
-  }
-  if (xMin <= 0 && xMax >= 0) {
-    ctx.beginPath(); ctx.moveTo(tx(0), 0); ctx.lineTo(tx(0), H); ctx.stroke();
-  }
-
-  // Tick labels
-  ctx.fillStyle = 'rgba(120,128,160,0.9)';
-  ctx.font = '11px DM Mono, monospace';
-  ctx.textAlign = 'center';
-  const y0 = Math.min(Math.max(ty(0), 4), H - 4);
-  for (let x = Math.ceil(xMin / xStep) * xStep; x <= xMax; x += xStep) {
-    const px = tx(x);
-    if (Math.abs(x) < xStep * 0.01) continue;
-    ctx.fillText(+x.toFixed(2), px, y0 + 14);
-  }
-  ctx.textAlign = 'right';
-  const x0 = Math.min(Math.max(tx(0), 20), W - 4);
-  for (let y = Math.ceil(yMin / yStep) * yStep; y <= yMax; y += yStep) {
-    const py = ty(y);
-    if (Math.abs(y) < yStep * 0.01) continue;
-    ctx.fillText(+y.toFixed(2), x0 - 4, py + 4);
-  }
-}
-
-function niceStep(range, ticks) {
-  const raw = range / ticks;
-  const exp = Math.floor(Math.log10(raw));
-  const frac = raw / Math.pow(10, exp);
-  let nice = frac < 1.5 ? 1 : frac < 3 ? 2 : frac < 7 ? 5 : 10;
-  return nice * Math.pow(10, exp);
-}
-
-function drawCurve(ctx, f, T, color, lw=2.5) {
-  const { tx, ty, xMin, xMax } = T;
-  ctx.strokeStyle = color; ctx.lineWidth = lw;
-  ctx.beginPath();
-  let first = true, steps = 600;
-  for (let i = 0; i <= steps; i++) {
-    const x = xMin + i / steps * (xMax - xMin);
-    const y = f(x);
-    if (!isFinite(y)) { first = true; continue; }
-    if (first) { ctx.moveTo(tx(x), ty(y)); first = false; } else ctx.lineTo(tx(x), ty(y));
-  }
-  ctx.stroke();
-}
-
-// ===== DRAW 1: DIỆN TÍCH 1 HÀM =====
-function draw1() {
-  const fExpr = document.getElementById('f1').value;
-  const a = parseFloat(document.getElementById('a1').value);
-  const b = parseFloat(document.getElementById('b1').value);
-  const n = parseInt(document.getElementById('n1').value);
-  const errEl = document.getElementById('err1');
-  document.getElementById('f1').classList.remove('err');
-
-  const f = parseFn(fExpr);
-  if (!f || isNaN(a) || isNaN(b) || a >= b) {
-    errEl.textContent = !f ? 'Hàm số không hợp lệ! Kiểm tra lại cú pháp.' : 'Cận dưới phải nhỏ hơn cận trên.';
-    errEl.classList.add('show');
-    document.getElementById('f1').classList.add('err');
-    return;
-  }
-  errEl.classList.remove('show');
-
-  const { ctx, W, H } = setupCtx('c1');
-  ctx.fillStyle = '#0d0f14'; ctx.fillRect(0, 0, W, H);
-
-  const xPad = b - a;
-  const { mn, mx } = getRange(f, a - xPad * 0.05, b + xPad * 0.05);
-  const yRange = Math.max(Math.abs(mn), Math.abs(mx), 0.5);
-  const T = makeTransform(W, H, a - xPad * 0.08, b + xPad * 0.08, mn - yRange * 0.2, mx + yRange * 0.25, 50);
-
-  drawAxesGrid(ctx, T);
-
-  // Riemann rectangles
-  const dx = (b - a) / n;
-  for (let i = 0; i < n; i++) {
-    const xi = a + i * dx;
-    const yi = f(xi);
-    const px0 = T.tx(xi), px1 = T.tx(xi + dx);
-    const py0 = T.ty(0), py1 = T.ty(yi);
-    ctx.fillStyle = yi >= 0 ? 'rgba(108,99,255,0.28)' : 'rgba(255,107,107,0.28)';
-    ctx.fillRect(px0, Math.min(py0, py1), px1 - px0, Math.abs(py1 - py0));
-    ctx.strokeStyle = yi >= 0 ? 'rgba(108,99,255,0.5)' : 'rgba(255,107,107,0.5)';
-    ctx.lineWidth = 0.5;
-    ctx.strokeRect(px0, Math.min(py0, py1), px1 - px0, Math.abs(py1 - py0));
-  }
-
-  // Shade under curve
-  ctx.beginPath();
-  ctx.moveTo(T.tx(a), T.ty(0));
-  for (let i = 0; i <= 400; i++) {
-    const x = a + i / 400 * (b - a);
-    ctx.lineTo(T.tx(x), T.ty(f(x)));
-  }
-  ctx.lineTo(T.tx(b), T.ty(0));
-  ctx.closePath();
-  const grad = ctx.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, 'rgba(0,229,176,0.12)');
-  grad.addColorStop(1, 'rgba(0,229,176,0)');
-  ctx.fillStyle = grad; ctx.fill();
-
-  // Curve
-  drawCurve(ctx, f, T, '#00e5b0', 2.5);
-
-  // Vertical bounds
-  ctx.strokeStyle = 'rgba(255,209,102,0.8)'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]);
-  ctx.beginPath(); ctx.moveTo(T.tx(a), T.ty(T.yMin)); ctx.lineTo(T.tx(a), T.ty(T.yMax)); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(T.tx(b), T.ty(T.yMin)); ctx.lineTo(T.tx(b), T.ty(T.yMax)); ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Labels
-  ctx.fillStyle = '#ffd166'; ctx.font = 'bold 13px DM Mono, monospace'; ctx.textAlign = 'center';
-  ctx.fillText('a=' + a, T.tx(a), H - 8);
-  ctx.fillText('b=' + b, T.tx(b), H - 8);
-  ctx.fillStyle = '#00e5b0'; ctx.textAlign = 'left';
-  ctx.fillText('f(x) = ' + fExpr, T.pw + 8, 20);
-
-  const approx = riemannLeft(f, a, b, n);
-  const exact = integrate(f, a, b);
-  document.getElementById('r1approx').textContent = approx.toFixed(5);
-  document.getElementById('r1exact').textContent = exact.toFixed(5);
-  document.getElementById('r1err').textContent = Math.abs(approx - exact).toFixed(5);
-}
-
-// ===== DRAW 2: DIỆN TÍCH 2 HÀM =====
-function draw2() {
-  const fExpr = document.getElementById('f2').value;
-  const gExpr = document.getElementById('g2').value;
-  const a = parseFloat(document.getElementById('a2').value);
-  const b = parseFloat(document.getElementById('b2').value);
-  const errEl = document.getElementById('err2');
-
-  const f = parseFn(fExpr), g = parseFn(gExpr);
-  if (!f || !g || isNaN(a) || isNaN(b) || a >= b) {
-    errEl.textContent = (!f || !g) ? 'Hàm số không hợp lệ!' : 'Cận không hợp lệ.';
-    errEl.classList.add('show'); return;
-  }
-  errEl.classList.remove('show');
-
-  const { ctx, W, H } = setupCtx('c2');
-  ctx.fillStyle = '#0d0f14'; ctx.fillRect(0, 0, W, H);
-
-  const xPad = b - a;
-  const allY = [];
-  for (let i = 0; i <= 200; i++) {
-    const x = a - xPad * 0.05 + i / 200 * (xPad * 1.1);
-    if (isFinite(f(x))) allY.push(f(x));
-    if (isFinite(g(x))) allY.push(g(x));
-  }
-  const mn = Math.min(...allY), mx = Math.max(...allY);
-  const yR = Math.max(Math.abs(mn), Math.abs(mx), 0.5);
-  const T = makeTransform(W, H, a - xPad * 0.08, b + xPad * 0.08, mn - yR * 0.2, mx + yR * 0.25, 50);
-
-  drawAxesGrid(ctx, T);
-
-  // Fill between
-  ctx.beginPath();
-  ctx.moveTo(T.tx(a), T.ty(f(a)));
-  for (let i = 1; i <= 400; i++) {
-    const x = a + i / 400 * (b - a);
-    ctx.lineTo(T.tx(x), T.ty(f(x)));
-  }
-  for (let i = 400; i >= 0; i--) {
-    const x = a + i / 400 * (b - a);
-    ctx.lineTo(T.tx(x), T.ty(g(x)));
-  }
-  ctx.closePath();
-  const grad2 = ctx.createLinearGradient(0, 0, 0, H);
-  grad2.addColorStop(0, 'rgba(108,99,255,0.35)');
-  grad2.addColorStop(1, 'rgba(0,229,176,0.15)');
-  ctx.fillStyle = grad2; ctx.fill();
-  ctx.strokeStyle = 'rgba(108,99,255,0.4)'; ctx.lineWidth = 0.5; ctx.stroke();
-
-  drawCurve(ctx, f, T, '#6c63ff', 2.5);
-  drawCurve(ctx, g, T, '#ff6b6b', 2.5);
-
-  // Bounds
-  ctx.strokeStyle = 'rgba(255,209,102,0.8)'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]);
-  ctx.beginPath(); ctx.moveTo(T.tx(a), T.ty(T.yMin)); ctx.lineTo(T.tx(a), T.ty(T.yMax)); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(T.tx(b), T.ty(T.yMin)); ctx.lineTo(T.tx(b), T.ty(T.yMax)); ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Labels
-  ctx.fillStyle = '#ffd166'; ctx.font = 'bold 13px DM Mono, monospace'; ctx.textAlign = 'center';
-  ctx.fillText('a=' + a, T.tx(a), H - 8);
-  ctx.fillText('b=' + b, T.tx(b), H - 8);
-  ctx.fillStyle = '#6c63ff'; ctx.textAlign = 'left';
-  ctx.fillText('f(x) = ' + fExpr, T.pw + 8, 18);
-  ctx.fillStyle = '#ff6b6b';
-  ctx.fillText('g(x) = ' + gExpr, T.pw + 8, 34);
-
-  const S = integrate(x => Math.abs(f(x) - g(x)), a, b);
-  document.getElementById('r2s').textContent = S.toFixed(5);
-  document.getElementById('r2fa').textContent = f(a).toFixed(4);
-  document.getElementById('r2fb').textContent = f(b).toFixed(4);
-}
-
-// ===== DRAW 3: THỂ TÍCH TRÒN XOAY =====
-function draw3() {
-  const fExpr = document.getElementById('f3').value;
-  const a = parseFloat(document.getElementById('a3').value);
-  const b = parseFloat(document.getElementById('b3').value);
-  const errEl = document.getElementById('err3');
-
-  const f = parseFn(fExpr);
-  if (!f || isNaN(a) || isNaN(b) || a >= b) {
-    errEl.textContent = !f ? 'Hàm số không hợp lệ!' : 'Cận không hợp lệ.';
-    errEl.classList.add('show'); return;
-  }
-  errEl.classList.remove('show');
-
-  const canvas = document.getElementById('c3');
-  const W = 880, H = 460;
-  canvas.width = W; canvas.height = H;
+// Logic cho từng tab
+function draw(tabNum) {
+  const fExpr = document.getElementById(`f${tabNum}`).value;
+  const a = parseFloat(document.getElementById(`a${tabNum}`).value);
+  const b = parseFloat(document.getElementById(`b${tabNum}`).value);
+  const canvas = document.getElementById(`c${tabNum}`);
   const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
   ctx.fillStyle = '#0d0f14'; ctx.fillRect(0, 0, W, H);
 
-  const padL = 60, padR = 30, padT = 40, padB = 40;
-  const CW = W - padL - padR, CH = H - padT - padB;
-  const midY = padT + CH / 2;
+  // Vẽ trục tọa độ cơ bản
+  const pad = 50;
+  const scaleX = (W - 2*pad) / (Math.abs(b-a) || 1);
+  const tX = x => pad + (x - a) * scaleX;
 
-  let maxR = 0;
-  for (let i = 0; i <= 200; i++) {
-    const x = a + i / 200 * (b - a);
-    const y = Math.abs(f(x));
-    if (isFinite(y)) maxR = Math.max(maxR, y);
+  // Tìm y min/max để scale
+  let ys = [];
+  for(let i=0; i<=100; i++) {
+    let val = evaluateFn(fExpr, a + (i/100)*(b-a));
+    if(isFinite(val)) ys.push(val);
   }
-  maxR = Math.max(maxR, 0.5);
+  let minY = Math.min(...ys, 0), maxY = Math.max(...ys, 1);
+  const scaleY = (H - 2*pad) / (maxY - minY || 1);
+  const tY = y => H - pad - (y - minY) * scaleY;
 
-  const scX = CW / (b - a + 0.001);
-  const scY = (CH / 2 * 0.8) / maxR;
-  const txf = x => padL + (x - a) * scX;
-  const tyf = r => midY - r * scY;
-
-  // Grid
-  ctx.strokeStyle = 'rgba(108,99,255,0.07)'; ctx.lineWidth = 0.5;
-  for (let i = 0; i <= 10; i++) {
-    const px = padL + i / 10 * CW;
-    ctx.beginPath(); ctx.moveTo(px, padT); ctx.lineTo(px, padT + CH); ctx.stroke();
-  }
-
-  // Axis
-  ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(padL, midY); ctx.lineTo(W - padR + 10, midY); ctx.stroke();
-  ctx.fillStyle = 'rgba(120,128,160,0.7)'; ctx.font = '12px DM Mono, monospace';
-  ctx.textAlign = 'left'; ctx.fillText('x', W - padR + 14, midY + 4);
-
-  // Draw solid of revolution
-  const segs = 200;
-  for (let i = 0; i < segs; i++) {
-    const x0 = a + i / segs * (b - a);
-    const x1 = a + (i + 1) / segs * (b - a);
-    const r0 = Math.abs(f(x0)), r1 = Math.abs(f(x1));
-    const px0 = txf(x0), px1 = txf(x1);
-
-    // Body trapezoid
-    const grad3 = ctx.createLinearGradient(px0, 0, px1, 0);
-    grad3.addColorStop(0, `rgba(108,99,255,${0.25 + 0.15 * (i / segs)})`);
-    grad3.addColorStop(1, `rgba(108,99,255,${0.25 + 0.15 * ((i + 1) / segs)})`);
-    ctx.beginPath();
-    ctx.moveTo(px0, tyf(r0)); ctx.lineTo(px1, tyf(r1));
-    ctx.lineTo(px1, tyf(-r1)); ctx.lineTo(px0, tyf(-r0));
-    ctx.closePath();
-    ctx.fillStyle = grad3; ctx.fill();
-
-    // Ellipses for depth
-    const rMid = (r0 + r1) / 2, xMid = (px0 + px1) / 2;
-    ctx.beginPath();
-    ctx.ellipse(xMid, midY, (px1 - px0) / 2, rMid * scY, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0,229,176,0.06)'; ctx.fill();
-    ctx.strokeStyle = 'rgba(0,229,176,0.15)'; ctx.lineWidth = 0.5; ctx.stroke();
-  }
-
-  // Curve outline
-  ctx.strokeStyle = '#00e5b0'; ctx.lineWidth = 2.5; ctx.beginPath();
-  for (let i = 0; i <= 400; i++) {
-    const x = a + i / 400 * (b - a), y = f(x);
-    if (i === 0) ctx.moveTo(txf(x), tyf(y)); else ctx.lineTo(txf(x), tyf(y));
+  // Vẽ lưới
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.beginPath();
+  for(let i=0; i<=10; i++) {
+    let x = tX(a + (i/10)*(b-a));
+    ctx.moveTo(x, 0); ctx.lineTo(x, H);
   }
   ctx.stroke();
-  ctx.strokeStyle = 'rgba(0,229,176,0.35)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]); ctx.beginPath();
-  for (let i = 0; i <= 400; i++) {
-    const x = a + i / 400 * (b - a), y = -f(x);
-    if (i === 0) ctx.moveTo(txf(x), tyf(y)); else ctx.lineTo(txf(x), tyf(y));
+
+  // Vẽ đường cong f(x)
+  ctx.strokeStyle = '#00e5b0'; ctx.lineWidth = 3;
+  ctx.beginPath();
+  for(let i=0; i<=200; i++){
+    let x = a + (i/200)*(b-a);
+    let y = evaluateFn(fExpr, x);
+    if(i===0) ctx.moveTo(tX(x), tY(y)); else ctx.lineTo(tX(x), tY(y));
   }
-  ctx.stroke(); ctx.setLineDash([]);
+  ctx.stroke();
 
-  // Bound lines
-  ctx.strokeStyle = 'rgba(255,209,102,0.8)'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
-  ctx.beginPath(); ctx.moveTo(txf(a), midY - maxR * scY * 1.15); ctx.lineTo(txf(a), midY + maxR * scY * 1.15); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(txf(b), midY - maxR * scY * 1.15); ctx.lineTo(txf(b), midY + maxR * scY * 1.15); ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.fillStyle = '#ffd166'; ctx.font = 'bold 13px DM Mono, monospace'; ctx.textAlign = 'center';
-  ctx.fillText('a=' + a, txf(a), padT + 14);
-  ctx.fillText('b=' + b, txf(b), padT + 14);
-  ctx.fillStyle = '#00e5b0'; ctx.textAlign = 'left';
-  ctx.fillText('f(x) = ' + fExpr, padL + 8, padT - 10);
+  // Tính toán kết quả tùy theo tab
+  if (tabNum === 1) { // Diện tích
+    let s = integrate(fExpr, a, b);
+    document.getElementById('r1s').textContent = s.toFixed(4);
+    // Tô màu diện tích
+    ctx.fillStyle = 'rgba(108,99,255,0.2)';
+    ctx.beginPath(); ctx.moveTo(tX(a), tY(0));
+    for(let i=0; i<=100; i++){
+        let x = a + (i/100)*(b-a);
+        ctx.lineTo(tX(x), tY(evaluateFn(fExpr, x)));
+    }
+    ctx.lineTo(tX(b), tY(0)); ctx.fill();
+  }
 
-  const V = integrate(x => Math.PI * f(x) * f(x), a, b);
-  document.getElementById('r3v').textContent = (V / Math.PI).toFixed(5);
-  document.getElementById('r3vr').textContent = V.toFixed(5);
-  document.getElementById('r3rmax').textContent = maxR.toFixed(4);
+  if (tabNum === 2) { // Độ dài cung
+    const dfStr = getDerivativeStr(fExpr);
+    document.getElementById('r2df').textContent = "f'(x) = " + dfStr;
+    let l = 0;
+    const steps = 1000, dx = (b-a)/steps;
+    for(let i=0; i<steps; i++){
+      let x = a + i*dx;
+      let df = math.evaluate(dfStr, {x: x});
+      l += Math.sqrt(1 + df*df) * dx;
+    }
+    document.getElementById('r2l').textContent = l.toFixed(4);
+  }
+
+  if (tabNum === 3) { // Xoay Ox
+    let v = 0;
+    const steps = 1000, dx = (b-a)/steps;
+    for(let i=0; i<steps; i++){
+      let y = evaluateFn(fExpr, a + (i+0.5)*dx);
+      v += Math.PI * y * y * dx;
+    }
+    document.getElementById('r3v').textContent = v.toFixed(4);
+  }
+
+  if (tabNum === 4) { // Xoay Oy
+    let v = 0;
+    const steps = 1000, dx = (b-a)/steps;
+    for(let i=0; i<steps; i++){
+      let x = a + (i+0.5)*dx;
+      let y = Math.abs(evaluateFn(fExpr, x));
+      v += 2 * Math.PI * x * y * dx;
+    }
+    document.getElementById('r4v').textContent = v.toFixed(4);
+  }
+
+  if (tabNum === 5) { // Diện tích mặt
+    const dfStr = getDerivativeStr(fExpr);
+    let s = 0;
+    const steps = 1000, dx = (b-a)/steps;
+    for(let i=0; i<steps; i++){
+      let x = a + (i+0.5)*dx;
+      let y = Math.abs(evaluateFn(fExpr, x));
+      let df = math.evaluate(dfStr, {x: x});
+      s += 2 * Math.PI * y * Math.sqrt(1 + df*df) * dx;
+    }
+    document.getElementById('r5s').textContent = s.toFixed(4);
+  }
 }
 
-// ===== EXPORT PNG =====
-function exportPNG(canvasId, filename) {
-  const canvas = document.getElementById(canvasId);
-  const link = document.createElement('a');
-  link.download = filename + '.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-}
-
-// ===== TAB SWITCH =====
 function switchTab(id, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
+  let num = id.replace('t','');
+  draw(num);
 }
 
-// Auto draw on load
-window.addEventListener('load', () => { draw1(); });
+function exportPNG(id) {
+  const link = document.createElement('a');
+  link.download = 'ket_qua.png';
+  link.href = document.getElementById(id).toDataURL();
+  link.click();
+}
+
+window.onload = () => draw(1);
 </script>
 </body>
 </html>
