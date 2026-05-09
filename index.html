@@ -1,322 +1,547 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tích Phân Trực Quan Pro</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.2/math.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.30.0/plotly.min.js"></script>
-
-    <style>
-        :root {
-            --bg: #0d0f14;
-            --surface: #13161e;
-            --surface2: #1a1e2a;
-            --border: rgba(255,255,255,0.07);
-            --border2: rgba(255,255,255,0.13);
-            --text: #e8eaf0;
-            --muted: #7a8099;
-            --accent: #6c63ff;
-            --a2: #00e5b0;
-            --r: 14px;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: 'Be Vietnam Pro', sans-serif; 
-            min-height: 100vh;
-            line-height: 1.6;
-        }
-
-        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
-        
-        header { text-align: center; margin-bottom: 40px; }
-        h1 { font-family: 'DM Serif Display', serif; font-size: 3rem; margin-bottom: 10px; background: linear-gradient(to right, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .tabs { display: flex; gap: 8px; background: var(--surface); padding: 6px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 30px; overflow-x: auto; }
-        .tab { flex: 1; min-width: 120px; padding: 12px; border: none; background: transparent; color: var(--muted); cursor: pointer; border-radius: 8px; font-weight: 500; white-space: nowrap; transition: 0.3s; }
-        .tab.active { background: var(--accent); color: #fff; box-shadow: 0 4px 15px rgba(108,99,255,0.3); }
-
-        .panel { display: none; }
-        .panel.active { display: block; animation: fadeIn 0.4s ease; }
-
-        .input-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .field { display: flex; flex-direction: column; gap: 8px; }
-        .field label { font-family: 'DM Mono', monospace; font-size: 0.75rem; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; }
-        .field input { background: var(--surface2); border: 1px solid var(--border2); padding: 12px; border-radius: 8px; color: #fff; font-family: 'DM Mono', monospace; outline: none; }
-        .field input:focus { border-color: var(--accent); }
-
-        .btn-run { background: linear-gradient(135deg, var(--accent), #8b83ff); color: #fff; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-bottom: 25px; transition: 0.3s; }
-        .btn-run:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(108,99,255,0.4); }
-
-        .canvas-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; margin-bottom: 20px; position: relative; }
-        canvas { width: 100%; height: auto; display: block; border-radius: 8px; }
-        #plot3d { width: 100%; height: 500px; border-radius: 8px; }
-
-        .results { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .card { background: var(--surface2); padding: 20px; border-radius: var(--r); border: 1px solid var(--border); }
-        .card label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; margin-bottom: 5px; display: block; }
-        .card .val { font-family: 'DM Mono', monospace; font-size: 1.4rem; color: var(--a2); font-weight: 600; }
-
-        .formula { background: rgba(108,99,255,0.05); padding: 15px; border-radius: 10px; border-left: 4px solid var(--accent); margin-bottom: 20px; font-family: 'DM Mono', monospace; color: var(--muted); }
-        .formula b { color: var(--a2); }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tích Phân Trực Quan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.2/math.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+<style>
+:root{--bg:#0d0f14;--surface:#13161e;--surface2:#1a1e2a;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#e8eaf0;--muted:#7a8099;--accent:#6c63ff;--a2:#00e5b0;--a3:#ff6b6b;--a4:#ffd166;--r:14px}
+[data-theme="light"]{--bg:#f4f5f9;--surface:#fff;--surface2:#eef0f6;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);--text:#1a1c24;--muted:#636882;--accent:#4f46e5;--a2:#059669;--a3:#dc2626;--a4:#b45309}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Be Vietnam Pro',sans-serif;min-height:100vh;overflow-x:hidden;transition:background .25s,color .25s}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(108,99,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(108,99,255,.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+[data-theme=light] body::before{display:none}
+.wrap{max-width:980px;margin:0 auto;padding:36px 18px;position:relative;z-index:1}
+header{text-align:center;margin-bottom:40px;position:relative}
+.hacts{position:absolute;right:0;top:0;display:flex;gap:8px}
+.badge{display:inline-block;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--a2);background:rgba(0,229,176,.1);border:1px solid rgba(0,229,176,.2);padding:5px 14px;border-radius:100px;margin-bottom:16px}
+h1{font-family:'DM Serif Display',serif;font-size:clamp(30px,6vw,56px);line-height:1.05;background:linear-gradient(135deg,var(--text) 0%,#a8a8ff 50%,var(--a2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+.sub{color:var(--muted);font-size:14px}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:5px;margin-bottom:26px;flex-wrap:wrap}
+.tab{flex:1;min-width:90px;padding:8px 10px;border:none;background:transparent;color:var(--muted);font-family:'Be Vietnam Pro',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border-radius:8px;transition:all .18s;text-align:center}
+.tab:hover{color:var(--text);background:var(--surface2)}
+.tab.active{background:linear-gradient(135deg,var(--accent),#8b83ff);color:#fff;box-shadow:0 4px 14px rgba(108,99,255,.3)}
+.panel{display:none}.panel.active{display:block}
+.ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace}
+.field input,.field select{background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:8px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none;transition:border .2s}
+.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,.12)}
+.field input.err{border-color:var(--a3)}
+.sr{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sr label{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;min-width:88px}
+.sr input[type=range]{flex:1;accent-color:var(--accent)}
+.sv{font-size:12px;font-family:'DM Mono',monospace;color:var(--a2);min-width:34px;text-align:right}
+.acts{display:flex;gap:7px;margin-bottom:16px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:9px;font-family:'Be Vietnam Pro',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border:none;white-space:nowrap;transition:all .16s}
+.bp{background:linear-gradient(135deg,var(--accent),#8b83ff);color:#fff;box-shadow:0 4px 12px rgba(108,99,255,.35)}
+.bp:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(108,99,255,.45)}
+.bg{background:linear-gradient(135deg,#00b37a,#00e5b0);color:#fff;box-shadow:0 4px 12px rgba(0,229,176,.28)}
+.bo{background:transparent;border:1px solid var(--border2);color:var(--muted)}
+.bo:hover{background:var(--surface2);color:var(--text)}
+.bi{padding:8px 12px;background:var(--surface2);border:1px solid var(--border2);color:var(--muted);border-radius:9px;cursor:pointer;font-size:15px;transition:all .2s}
+.bi:hover{color:var(--text);border-color:var(--accent)}
+.cw{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:16px}
+.cw canvas{display:block;width:100%;height:auto;cursor:crosshair}
+.cl{position:absolute;top:10px;left:12px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;pointer-events:none}
+.ch{position:absolute;bottom:10px;right:12px;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;pointer-events:none}
+.rcs{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px;margin-bottom:16px}
+.rc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px}
+.rl{font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.rv{font-size:19px;font-weight:600;font-family:'DM Mono',monospace;color:var(--text);word-break:break-all}
+.ru{font-size:11px;color:var(--muted);margin-top:2px}
+.rc.hi{border-color:rgba(108,99,255,.3);background:rgba(108,99,255,.06)}
+.rc.hi .rv{color:var(--a2)}
+.fb{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-family:'DM Mono',monospace;font-size:13px;color:var(--muted);line-height:1.7}
+.fb span{color:var(--a2)}
+.em{background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.25);color:#ff9999;border-radius:9px;padding:8px 12px;font-size:13px;margin-bottom:12px;display:none}
+.em.show{display:block}
+.tw{display:none;margin-bottom:16px}.tw.show{display:block}
+.dt{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:12px}
+.dt th{background:var(--surface2);color:var(--muted);padding:7px 11px;text-align:left;border-bottom:1px solid var(--border2);font-weight:500}
+.dt td{padding:6px 11px;border-bottom:1px solid var(--border);color:var(--text)}
+.dt tr:hover td{background:var(--surface2)}
+.ts{max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:10px}
+#pm3d{width:100%;height:490px;border-radius:var(--r);overflow:hidden;background:var(--surface);border:1px solid var(--border);margin-bottom:16px;position:relative}
+#pm3h{position:absolute;top:10px;left:12px;font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:2px;text-transform:uppercase;pointer-events:none;z-index:2}
+.sp{display:none}
+.sp.active{display:block}
+.howto{margin-top:44px;border-top:1px solid var(--border);padding-top:32px}
+.howto h2{font-family:'DM Serif Display',serif;font-size:24px;margin-bottom:18px}
+.stps{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.stp{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.sn{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:2px;margin-bottom:6px}
+.stp h3{font-size:13px;font-weight:600;margin-bottom:4px}
+.stp p{font-size:12px;color:var(--muted);line-height:1.6}
+.stp code{font-family:'DM Mono',monospace;font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px;color:var(--a2)}
+footer{margin-top:48px;text-align:center;font-size:12px;color:var(--muted);padding-bottom:32px}
+footer a{color:var(--accent);text-decoration:none}
+</style>
 </head>
 <body>
+<div class="wrap">
+<header>
+  <div class="hacts"><button class="bi" onclick="toggleTheme()" title="Sáng/Tối">🌓</button></div>
+  <div class="badge">Toán 12 · Giải tích đại cương</div>
+  <h1>Tích Phân<br><em>Trực Quan</em></h1>
+  <p class="sub">Nhập hàm số — xem ngay kết quả với đồ thị tương tác &amp; 3D</p>
+</header>
 
-<div class="container">
-    <header>
-        <h1>Tích Phân Đa Năng</h1>
-        <p style="color: var(--muted)">Công cụ giải tích và trực quan hóa chuyên sâu</p>
-    </header>
+<div class="tabs" id="maintabs">
+  <button class="tab active" onclick="switchTab('t1',this)">📐 Diện tích</button>
+  <button class="tab" onclick="switchTab('t2',this)">📊 2 Hàm</button>
+  <button class="tab" onclick="switchTab('t3',this)">🔵 Thể tích 3D</button>
+  <button class="tab" onclick="switchTab('t4',this)">🥫 Vỏ trụ</button>
+  <button class="tab" onclick="switchTab('t5',this)">📏 Độ dài cung</button>
+  <button class="tab" onclick="switchTab('t6',this)">🌐 Diện tích xoay</button>
+  <button class="tab" onclick="switchTab('t7',this)">🎯 Tham số &amp; Cực</button>
+</div>
 
-    <div class="tabs" id="maintabs">
-        <button class="tab active" onclick="switchTab('t1', this)">Diện tích</button>
-        <button class="tab" onclick="switchTab('t2', this)">Độ dài cung</button>
-        <button class="tab" onclick="switchTab('t3', this)">Xoay Ox (3D)</button>
-        <button class="tab" onclick="switchTab('t4', this)">Xoay Oy</button>
-        <button class="tab" onclick="switchTab('t5', this)">Diện tích mặt</button>
+<!-- T1 -->
+<div id="t1" class="panel active">
+  <div class="fb">S = <span>∫ₐᵇ f(x) dx</span></div>
+  <div id="e1" class="em"></div>
+  <div class="ig">
+    <div class="field"><label>f(x) =</label><input id="f1" value="x^2 - 2*x + 1"></div>
+    <div class="field"><label>Cận dưới a</label><input id="a1" type="number" value="0" step="0.5"></div>
+    <div class="field"><label>Cận trên b</label><input id="b1" type="number" value="3" step="0.5"></div>
+  </div>
+  <div class="sr"><label>Số HCN n</label><input type="range" id="n1" min="2" max="100" value="20" oninput="document.getElementById('nv1').textContent=this.value"><span class="sv" id="nv1">20</span></div>
+  <div class="acts">
+    <button class="btn bp" onclick="draw1(false)">▶ Vẽ</button>
+    <button class="btn bg" onclick="draw1(true)">▶ Animate</button>
+    <button class="btn bo" onclick="toggleT('tb1')">📋 Bảng</button>
+    <button class="btn bo" onclick="xpng('c1','dientich')">⬇ PNG</button>
+  </div>
+  <div class="cw"><span class="cl">Riemann Sum</span><span class="ch">Scroll: zoom · Drag: pan</span><canvas id="c1" width="900" height="420"></canvas></div>
+  <div class="rcs">
+    <div class="rc hi"><div class="rl">Xấp xỉ Riemann</div><div class="rv" id="r1a">—</div><div class="ru">đvdt²</div></div>
+    <div class="rc"><div class="rl">Chính xác</div><div class="rv" id="r1e">—</div><div class="ru">đvdt²</div></div>
+    <div class="rc"><div class="rl">Sai số</div><div class="rv" id="r1er">—</div></div>
+  </div>
+  <div id="tb1" class="tw"><div class="ts"><table class="dt"><thead id="tb1h"></thead><tbody id="tb1b"></tbody></table></div></div>
+</div>
+
+<!-- T2 -->
+<div id="t2" class="panel">
+  <div class="fb">S = <span>∫ₐᵇ |f(x)−g(x)| dx</span></div>
+  <div id="e2" class="em"></div>
+  <div class="ig">
+    <div class="field"><label>f(x) trên</label><input id="f2" value="sin(x)+2"></div>
+    <div class="field"><label>g(x) dưới</label><input id="g2" value="x/2"></div>
+    <div class="field"><label>Cận dưới a</label><input id="a2" type="number" value="0" step="0.5"></div>
+    <div class="field"><label>Cận trên b</label><input id="b2" type="number" value="3" step="0.5"></div>
+  </div>
+  <div class="acts">
+    <button class="btn bp" onclick="draw2(false)">▶ Vẽ</button>
+    <button class="btn bg" onclick="draw2(true)">▶ Animate</button>
+    <button class="btn bo" onclick="xpng('c2','dientich2')">⬇ PNG</button>
+  </div>
+  <div class="cw"><span class="cl">Diện tích 2 hàm</span><span class="ch">Scroll: zoom · Drag: pan</span><canvas id="c2" width="900" height="420"></canvas></div>
+  <div class="rcs">
+    <div class="rc hi"><div class="rl">Diện tích S</div><div class="rv" id="r2s">—</div><div class="ru">đvdt²</div></div>
+    <div class="rc"><div class="rl">f(a)</div><div class="rv" id="r2fa">—</div></div>
+    <div class="rc"><div class="rl">g(a)</div><div class="rv" id="r2ga">—</div></div>
+  </div>
+</div>
+
+<!-- T3: 3D Plotly -->
+<div id="t3" class="panel">
+  <div class="fb">V = <span>π ∫ₐᵇ [f(x)]² dx</span> (phương pháp đĩa, xoay quanh Ox)</div>
+  <div id="e3" class="em"></div>
+  <div class="ig">
+    <div class="field"><label>f(x) =</label><input id="f3" value="sqrt(x)"></div>
+    <div class="field"><label>Cận dưới a</label><input id="a3" type="number" value="0" step="0.5"></div>
+    <div class="field"><label>Cận trên b</label><input id="b3" type="number" value="4" step="0.5"></div>
+  </div>
+  <div class="acts">
+    <button class="btn bp" onclick="build3d()">▶ Dựng 3D</button>
+    <button class="btn bo" id="bwire" onclick="toggleWire()">⬡ Wireframe</button>
+  </div>
+  <div id="pm3d"><div id="pm3h">Kéo để xoay · Scroll để zoom · Double-click reset</div><div id="pld" style="width:100%;height:100%"></div></div>
+  <div class="rcs">
+    <div class="rc hi"><div class="rl">Thể tích V</div><div class="rv" id="r3v">—</div><div class="ru">× π đvtt³</div></div>
+    <div class="rc"><div class="rl">V (số thực)</div><div class="rv" id="r3vr">—</div></div>
+    <div class="rc"><div class="rl">R max</div><div class="rv" id="r3rm">—</div></div>
+  </div>
+</div>
+
+<!-- T4: Cylindrical Shells -->
+<div id="t4" class="panel">
+  <div class="fb">V = <span>2π ∫ₐᵇ x·f(x) dx</span> (vỏ trụ, xoay quanh Oy)</div>
+  <div id="e4" class="em"></div>
+  <div class="ig">
+    <div class="field"><label>f(x) =</label><input id="f4" value="x*(2-x)"></div>
+    <div class="field"><label>Cận dưới a ≥ 0</label><input id="a4" type="number" value="0" step="0.25" min="0"></div>
+    <div class="field"><label>Cận trên b</label><input id="b4" type="number" value="2" step="0.25"></div>
+  </div>
+  <div class="acts">
+    <button class="btn bp" onclick="draw4(false)">▶ Vẽ</button>
+    <button class="btn bg" onclick="draw4(true)">▶ Animate vỏ trụ</button>
+    <button class="btn bo" onclick="xpng('c4','vo_tru')">⬇ PNG</button>
+  </div>
+  <div class="cw"><span class="cl">Cylindrical Shells</span><canvas id="c4" width="900" height="440"></canvas></div>
+  <div class="rcs">
+    <div class="rc hi"><div class="rl">Thể tích V</div><div class="rv" id="r4v">—</div><div class="ru">đvtt³</div></div>
+    <div class="rc"><div class="rl">2π × ∫xf dx</div><div class="rv" id="r4i">—</div></div>
+  </div>
+</div>
+
+<!-- T5: Arc Length -->
+<div id="t5" class="panel">
+  <div class="fb">L = <span>∫ₐᵇ √(1+[f′(x)]²) dx</span></div>
+  <div id="e5" class="em"></div>
+  <div class="ig">
+    <div class="field"><label>f(x) =</label><input id="f5" value="x^2/2"></div>
+    <div class="field"><label>Cận dưới a</label><input id="a5" type="number" value="0" step="0.5"></div>
+    <div class="field"><label>Cận trên b</label><input id="b5" type="number" value="3" step="0.5"></div>
+  </div>
+  <div class="acts">
+    <button class="btn bp" onclick="draw5(false)">▶ Vẽ</button>
+    <button class="btn bg" onclick="draw5(true)">▶ Animate cung</button>
+    <button class="btn bo" onclick="toggleT('tb5')">📋 Bảng</button>
+    <button class="btn bo" onclick="xpng('c5','arc_length')">⬇ PNG</button>
+  </div>
+  <div class="cw"><span class="cl">Arc Length · f′(x) tangent lines</span><canvas id="c5" width="900" height="420"></canvas></div>
+  <div class="rcs">
+    <div class="rc hi"><div class="rl">Độ dài L</div><div class="rv" id="r5l">—</div><div class="ru">đv dài</div></div>
+    <div class="rc"><div class="rl">f′(a)</div><div class="rv" id="r5da">—</div></div>
+    <div class="rc"><div class="rl">f′(b)</div><div class="rv" id="r5db">—</div></div>
+  </div>
+  <div id="tb5" class="tw"><div class="ts"><table class="dt"><thead id="tb5h"></thead><tbody id="tb5b"></tbody></table></div></div>
+</div>
+
+<!-- T6: Surface Area -->
+<div id="t6" class="panel">
+  <div class="fb" id="fb6">S = <span>2π ∫ₐᵇ f(x)·√(1+[f′(x)]²) dx</span> (xoay quanh Ox)</div>
+  <div id="e6" class="em"></div>
+  <div class="ig">
+    <div class="field"><label>f(x) =</label><input id="f6" value="sqrt(x)"></div>
+    <div class="field"><label>Cận dưới a</label><input id="a6" type="number" value="1" step="0.5"></div>
+    <div class="field"><label>Cận trên b</label><input id="b6" type="number" value="4" step="0.5"></div>
+    <div class="field"><label>Xoay quanh</label>
+      <select id="ax6" onchange="upFb6()">
+        <option value="ox">Trục Ox</option>
+        <option value="oy">Trục Oy</option>
+      </select>
     </div>
+  </div>
+  <div class="acts">
+    <button class="btn bp" onclick="draw6()">▶ Tính &amp; Vẽ</button>
+    <button class="btn bo" onclick="xpng('c6','dien_tich_mat')">⬇ PNG</button>
+  </div>
+  <div class="cw"><span class="cl">Surface Area of Revolution</span><canvas id="c6" width="900" height="420"></canvas></div>
+  <div class="rcs">
+    <div class="rc hi"><div class="rl">Diện tích S</div><div class="rv" id="r6s">—</div><div class="ru">đvdt²</div></div>
+    <div class="rc"><div class="rl">S ÷ 2π</div><div class="rv" id="r6p">—</div></div>
+  </div>
+</div>
 
-    <div id="t1" class="panel active">
-        <div class="formula">Công thức: S = <b>∫ₐᵇ |f(x)| dx</b></div>
-        <div class="input-group">
-            <div class="field"><label>Hàm số f(x)</label><input id="f1" value="x^2 - 2x"></div>
-            <div class="field"><label>Cận a</label><input id="a1" type="number" value="0"></div>
-            <div class="field"><label>Cận b</label><input id="b1" type="number" value="3"></div>
-        </div>
-        <button class="btn-run" onclick="solveArea()">▶ Tính toán & Vẽ</button>
-        <div class="canvas-card"><canvas id="c1" width="900" height="400"></canvas></div>
-        <div class="results">
-            <div class="card"><label>Diện tích S</label><div class="val" id="r1s">—</div></div>
-        </div>
+<!-- T7: Param + Polar -->
+<div id="t7" class="panel">
+  <div class="tabs" style="margin-bottom:14px">
+    <button class="tab active" onclick="switchSub('sp',this)" style="flex:none;min-width:80px">Tham số</button>
+    <button class="tab" onclick="switchSub('sr2',this)" style="flex:none;min-width:80px">Toạ độ cực</button>
+  </div>
+  <div id="sp" class="sp active">
+    <div class="fb">x=<span>x(t)</span>, y=<span>y(t)</span> · L=<span>∫√(x′²+y′²)dt</span></div>
+    <div id="e7p" class="em"></div>
+    <div class="ig">
+      <div class="field"><label>x(t) =</label><input id="xt" value="cos(t)"></div>
+      <div class="field"><label>y(t) =</label><input id="yt" value="sin(t)"></div>
+      <div class="field"><label>t từ</label><input id="t0" type="number" value="0" step="0.1"></div>
+      <div class="field"><label>t đến</label><input id="t1v" type="number" value="6.2832" step="0.1"></div>
     </div>
+    <div class="acts">
+      <button class="btn bp" onclick="drawP(false)">▶ Vẽ</button>
+      <button class="btn bg" onclick="drawP(true)">▶ Animate</button>
+      <button class="btn bo" onclick="preset('p','cardioid')">♥ Cardioid</button>
+      <button class="btn bo" onclick="preset('p','lissajous')">∿ Lissajous</button>
+      <button class="btn bo" onclick="preset('p','spiral')">🌀 Xoắn ốc</button>
+    </div>
+    <div class="cw"><span class="cl">Parametric Curve</span><canvas id="c7p" width="900" height="440"></canvas></div>
+    <div class="rcs">
+      <div class="rc hi"><div class="rl">Độ dài L</div><div class="rv" id="r7pl">—</div></div>
+      <div class="rc"><div class="rl">Diện tích</div><div class="rv" id="r7pa">—</div><div class="ru">|∫y dx|</div></div>
+    </div>
+  </div>
+  <div id="sr2" class="sp">
+    <div class="fb">A = <span>½ ∫ₐᵇ [r(θ)]² dθ</span></div>
+    <div id="e7r" class="em"></div>
+    <div class="ig">
+      <div class="field"><label>r(θ) =</label><input id="rt" value="1+cos(theta)"></div>
+      <div class="field"><label>θ từ</label><input id="th0" type="number" value="0" step="0.1"></div>
+      <div class="field"><label>θ đến</label><input id="th1" type="number" value="6.2832" step="0.1"></div>
+    </div>
+    <div class="acts">
+      <button class="btn bp" onclick="drawR(false)">▶ Vẽ</button>
+      <button class="btn bg" onclick="drawR(true)">▶ Animate</button>
+      <button class="btn bo" onclick="preset('r','cardioid')">♥ Cardioid</button>
+      <button class="btn bo" onclick="preset('r','rose4')">🌸 Hoa 4 cánh</button>
+      <button class="btn bo" onclick="preset('r','lemniscate')">∞ Lemniscate</button>
+    </div>
+    <div class="cw"><span class="cl">Polar Curve</span><canvas id="c7r" width="900" height="440"></canvas></div>
+    <div class="rcs">
+      <div class="rc hi"><div class="rl">Diện tích A</div><div class="rv" id="r7ra">—</div><div class="ru">đvdt²</div></div>
+      <div class="rc"><div class="rl">R max</div><div class="rv" id="r7rm">—</div></div>
+    </div>
+  </div>
+</div>
 
-    <div id="t2" class="panel">
-        <div class="formula">Công thức: L = <b>∫ₐᵇ √(1 + [f'(x)]²) dx</b></div>
-        <div class="input-group">
-            <div class="field"><label>Hàm số f(x)</label><input id="f2" value="x^(3/2)"></div>
-            <div class="field"><label>Cận a</label><input id="a2" type="number" value="0"></div>
-            <div class="field"><label>Cận b</label><input id="b2" type="number" value="4"></div>
-        </div>
-        <button class="btn-run" onclick="solveArcLength()">▶ Tính toán & Vẽ</button>
-        <div class="canvas-card"><canvas id="c2" width="900" height="400"></canvas></div>
-        <div class="results">
-            <div class="card"><label>Độ dài L</label><div class="val" id="r2l">—</div></div>
-            <div class="card"><label>Đạo hàm f'(x)</label><div class="val" id="r2df" style="font-size:1rem">—</div></div>
-        </div>
-    </div>
-
-    <div id="t3" class="panel">
-        <div class="formula">Công thức: V = <b>π ∫ₐᵇ [f(x)]² dx</b></div>
-        <div class="input-group">
-            <div class="field"><label>Hàm số f(x)</label><input id="f3" value="sqrt(x)"></div>
-            <div class="field"><label>Cận a</label><input id="a3" type="number" value="0"></div>
-            <div class="field"><label>Cận b</label><input id="b3" type="number" value="4"></div>
-        </div>
-        <button class="btn-run" onclick="solveVolume3D()">▶ Dựng mô hình 3D</button>
-        <div class="canvas-card"><div id="plot3d"></div></div>
-        <div class="results">
-            <div class="card"><label>Thể tích V</label><div class="val" id="r3v">—</div></div>
-        </div>
-    </div>
-
-    <div id="t4" class="panel">
-        <div class="formula">Công thức: V = <b>2π ∫ₐᵇ x |f(x)| dx</b></div>
-        <div class="input-group">
-            <div class="field"><label>Hàm số f(x)</label><input id="f4" value="sin(x)"></div>
-            <div class="field"><label>Cận a</label><input id="a4" type="number" value="0"></div>
-            <div class="field"><label>Cận b</label><input id="b4" type="number" value="3.14159"></div>
-        </div>
-        <button class="btn-run" onclick="solveVolumeOy()">▶ Tính toán</button>
-        <div class="results">
-            <div class="card"><label>Thể tích V (Oy)</label><div class="val" id="r4v">—</div></div>
-        </div>
-    </div>
-
-    <div id="t5" class="panel">
-        <div class="formula">Công thức: S = <b>2π ∫ₐᵇ |f(x)| √(1 + [f'(x)]²) dx</b></div>
-        <div class="input-group">
-            <div class="field"><label>Hàm số f(x)</label><input id="f5" value="sqrt(4 - x^2)"></div>
-            <div class="field"><label>Cận a</label><input id="a5" type="number" value="-2"></div>
-            <div class="field"><label>Cận b</label><input id="b5" type="number" value="2"></div>
-        </div>
-        <button class="btn-run" onclick="solveSurface()">▶ Tính toán</button>
-        <div class="results">
-            <div class="card"><label>Diện tích mặt S</label><div class="val" id="r5s">—</div></div>
-        </div>
-    </div>
+<!-- HOW TO -->
+<div class="howto">
+  <h2>💡 Cách nhập hàm số</h2>
+  <div class="stps">
+    <div class="stp"><div class="sn">CƠ BẢN</div><h3>Phép tính</h3><p><code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>^</code> lũy thừa<br>Ví dụ: <code>x^3-2*x+1</code></p></div>
+    <div class="stp"><div class="sn">HÀM SỐ</div><h3>Lượng giác &amp; khác</h3><p><code>sin(x)</code> <code>cos(x)</code> <code>tan(x)</code> <code>sqrt(x)</code> <code>abs(x)</code> <code>log(x)</code> <code>exp(x)</code></p></div>
+    <div class="stp"><div class="sn">HẰNG SỐ</div><h3>Pi và e</h3><p><code>pi</code>=π<br><code>e</code>=2.718<br><code>theta</code> cho cực</p></div>
+    <div class="stp"><div class="sn">VÍ DỤ</div><h3>Thử ngay</h3><p><code>x^2*sin(x)</code><br><code>1/(1+x^2)</code><br><code>exp(-x^2)</code></p></div>
+  </div>
+</div>
+<footer>Tích Phân Trực Quan · Toán 12 &amp; Giải tích đại cương · <a href="https://github.com" target="_blank">GitHub Pages</a></footer>
 </div>
 
 <script>
-    // --- CẤU HÌNH MATH.JS ---
-    const parser = math.parser();
+// ── THEME ──
+function toggleTheme(){const h=document.documentElement;const l=h.getAttribute('data-theme')==='dark';h.setAttribute('data-theme',l?'light':'dark');}
 
-    function safeEval(expr, xVal) {
-        try { return math.evaluate(expr, { x: xVal }); } catch { return NaN; }
+// ── COLORS ──
+function C(){const l=document.documentElement.getAttribute('data-theme')==='light';return{bg:l?'#f4f5f9':'#0d0f14',grid:l?'rgba(0,0,0,.06)':'rgba(108,99,255,.08)',axis:l?'rgba(0,0,0,.22)':'rgba(255,255,255,.18)',text:l?'#636882':'rgba(120,128,160,.9)',c1:l?'#4f46e5':'#6c63ff',c2:l?'#dc2626':'#ff6b6b',f1:l?'rgba(79,70,229,.18)':'rgba(108,99,255,.28)',f2:l?'rgba(5,150,105,.18)':'rgba(0,229,176,.13)',ac:l?'#059669':'#00e5b0',go:l?'#b45309':'#ffd166',pb:l?'#f4f5f9':'#0d0f14',plb:l?'#eef0f6':'#13161e'}}
+
+// ── MATH ──
+function pf(e){try{const c=math.parse(e).compile();const f=v=>{const s={x:v,t:v,theta:v};const r=c.evaluate(s);return typeof r==='number'?r:NaN};f(1);return f}catch{return null}}
+function pf2(e,v){try{const c=math.parse(e).compile();const f=x=>{const s={};s[v]=x;s.theta=x;s.t=x;s.x=x;const r=c.evaluate(s);return typeof r==='number'?r:NaN};f(1);return f}catch{return null}}
+function deriv(e){try{const d=math.derivative(e,'x').compile();return x=>{try{const v=d.evaluate({x});return typeof v==='number'?v:NaN}catch{return NaN}}}catch{return null}}
+function intg(f,a,b,N=4000){const dx=(b-a)/N;let s=0;for(let i=0;i<N;i++)s+=f(a+(i+.5)*dx)*dx;return s;}
+function riemann(f,a,b,n){const dx=(b-a)/n;let s=0;for(let i=0;i<n;i++)s+=f(a+i*dx)*dx;return s;}
+
+// ── CANVAS ──
+function gc(id){const c=document.getElementById(id);const W=c.offsetWidth||900,H=+c.getAttribute('height')||420;c.width=W;c.height=H;return{c,ctx:c.getContext('2d'),W,H};}
+function ns(range,ticks){const r=range/ticks,e=Math.floor(Math.log10(r)),f=r/Math.pow(10,e);return(f<1.5?1:f<3?2:f<7?5:10)*Math.pow(10,e);}
+function mkT(W,H,x0,x1,y0,y1,p=50){const sx=(W-p*2)/(x1-x0),sy=(H-p*2)/(y1-y0);return{tx:x=>p+(x-x0)*sx,ty:y=>H-p-(y-y0)*sy,x0,x1,y0,y1,sx,sy,p,W,H};}
+function autoT(f,a,b,W,H){let mn=1e9,mx=-1e9;for(let i=0;i<=300;i++){const x=a+i/300*(b-a),y=f(x);if(isFinite(y)){mn=Math.min(mn,y);mx=Math.max(mx,y);}}if(!isFinite(mn)){mn=0;mx=1;}const xp=(b-a)*.08,yr=Math.max(Math.abs(mn),Math.abs(mx),.5);return mkT(W,H,a-xp,b+xp,mn-yr*.22,mx+yr*.28);}
+function axes(ctx,T,col){const{tx,ty,x0,x1,y0,y1,W,H,p}=T;ctx.strokeStyle=col.grid;ctx.lineWidth=.5;const xs=ns(x1-x0,8),ys=ns(y1-y0,6);for(let x=Math.ceil(x0/xs)*xs;x<=x1+xs*.01;x+=xs){const px=tx(x);ctx.beginPath();ctx.moveTo(px,0);ctx.lineTo(px,H);ctx.stroke();}for(let y=Math.ceil(y0/ys)*ys;y<=y1+ys*.01;y+=ys){const py=ty(y);ctx.beginPath();ctx.moveTo(0,py);ctx.lineTo(W,py);ctx.stroke();}ctx.strokeStyle=col.axis;ctx.lineWidth=1.5;if(y0<=0&&y1>=0){ctx.beginPath();ctx.moveTo(0,ty(0));ctx.lineTo(W,ty(0));ctx.stroke();}if(x0<=0&&x1>=0){ctx.beginPath();ctx.moveTo(tx(0),0);ctx.lineTo(tx(0),H);ctx.stroke();}ctx.fillStyle=col.text;ctx.font='11px DM Mono,monospace';const ay=Math.min(Math.max(ty(0)+14,16),H-4);ctx.textAlign='center';for(let x=Math.ceil(x0/xs)*xs;x<=x1+xs*.01;x+=xs){if(Math.abs(x)<xs*.01)continue;ctx.fillText(+x.toFixed(2),tx(x),ay);}const ax=Math.min(Math.max(tx(0)-5,28),W-4);ctx.textAlign='right';for(let y=Math.ceil(y0/ys)*ys;y<=y1+ys*.01;y+=ys){if(Math.abs(y)<ys*.01)continue;ctx.fillText(+y.toFixed(2),ax,ty(y)+4);}}
+function curve(ctx,f,T,color,lw=2.5){ctx.strokeStyle=color;ctx.lineWidth=lw;ctx.beginPath();let first=true;for(let i=0;i<=500;i++){const x=T.x0+i/500*(T.x1-T.x0),y=f(x);if(!isFinite(y)){first=true;continue;}if(first){ctx.moveTo(T.tx(x),T.ty(y));first=false;}else ctx.lineTo(T.tx(x),T.ty(y));}ctx.stroke();}
+function clr(ctx,W,H,col){ctx.fillStyle=col.bg;ctx.fillRect(0,0,W,H);}
+
+// ── ZOOM/PAN ──
+const VS={};
+function zp(id,fn){const c=document.getElementById(id);let drag=false,lx=0,ly=0;c.addEventListener('wheel',e=>{e.preventDefault();const v=VS[id];if(!v)return;const fac=e.deltaY>0?1.12:.89;const cx=(v.x0+v.x1)/2,cy=(v.y0+v.y1)/2,hw=(v.x1-v.x0)/2*fac,hh=(v.y1-v.y0)/2*fac;VS[id]={x0:cx-hw,x1:cx+hw,y0:cy-hh,y1:cy+hh};fn();},{passive:false});c.addEventListener('mousedown',e=>{drag=true;lx=e.clientX;ly=e.clientY;c.style.cursor='grabbing';});c.addEventListener('mousemove',e=>{if(!drag)return;const v=VS[id];if(!v)return;const r=c.getBoundingClientRect(),sx=(v.x1-v.x0)/r.width,sy=(v.y1-v.y0)/r.height;const dx=(e.clientX-lx)*sx,dy=(e.clientY-ly)*sy;VS[id]={x0:v.x0-dx,x1:v.x1-dx,y0:v.y0+dy,y1:v.y1+dy};lx=e.clientX;ly=e.clientY;fn();});c.addEventListener('mouseup',()=>{drag=false;c.style.cursor='crosshair';});c.addEventListener('mouseleave',()=>{drag=false;c.style.cursor='crosshair';});}
+
+// ── TABLE ──
+function toggleT(id){document.getElementById(id).classList.toggle('show');}
+function mkTbl(hid,bid,hdrs,rows){document.getElementById(hid).innerHTML='<tr>'+hdrs.map(h=>`<th>${h}</th>`).join('')+'</tr>';document.getElementById(bid).innerHTML=rows.map(r=>'<tr>'+r.map(c=>`<td>${c}</td>`).join('')+'</tr>').join('');}
+
+// ── ANIM ──
+let RAF=null;
+function anim(dur,drawFn,done){if(RAF){cancelAnimationFrame(RAF);RAF=null;}const s=performance.now();function f(now){const t=Math.min((now-s)/dur,1),e=t<.5?2*t*t:-1+(4-2*t)*t;drawFn(e);if(t<1)RAF=requestAnimationFrame(f);else{RAF=null;if(done)done();}}RAF=requestAnimationFrame(f);}
+
+// ── DRAW 1 ──
+let rd1=()=>{};
+function draw1(an=false){
+  const fE=document.getElementById('f1').value,a=+document.getElementById('a1').value,b=+document.getElementById('b1').value,n=+document.getElementById('n1').value;
+  const el=document.getElementById('e1'),f=pf(fE);
+  if(!f||isNaN(a)||isNaN(b)||a>=b){el.textContent=!f?'Hàm không hợp lệ!':'Cận không hợp lệ.';el.classList.add('show');return;}el.classList.remove('show');
+  const{ctx,W,H}=gc('c1'),col=C(),T=autoT(f,a,b,W,H);
+  VS['c1']={x0:T.x0,x1:T.x1,y0:T.y0,y1:T.y1};
+  const frame=prog=>{
+    clr(ctx,W,H,col);axes(ctx,T,col);
+    const dx=(b-a)/n,cnt=Math.ceil(prog*n);
+    for(let i=0;i<cnt;i++){
+      const xi=a+i*dx,yi=f(xi),px0=T.tx(xi),px1=T.tx(xi+dx),py0=T.ty(0);
+      const frac=i===cnt-1?((prog*n)%1||1):1,rh=Math.abs(T.ty(yi)-py0)*frac,ry=yi>=0?py0-rh:py0;
+      ctx.fillStyle=yi>=0?col.f1:'rgba(255,107,107,.22)';ctx.fillRect(px0,ry,px1-px0,rh);
+      ctx.strokeStyle=yi>=0?col.c1:col.c2;ctx.lineWidth=.5;ctx.strokeRect(px0,ry,px1-px0,rh);
     }
+    if(prog>=1){ctx.beginPath();ctx.moveTo(T.tx(a),T.ty(0));for(let i=0;i<=400;i++){const x=a+i/400*(b-a);ctx.lineTo(T.tx(x),T.ty(f(x)));}ctx.lineTo(T.tx(b),T.ty(0));ctx.closePath();const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,col.f2);g.addColorStop(1,'rgba(0,229,176,0)');ctx.fillStyle=g;ctx.fill();}
+    const xe=T.x0+prog*(T.x1-T.x0);ctx.strokeStyle=col.ac;ctx.lineWidth=2.5;ctx.beginPath();let fi=true;for(let i=0;i<=500;i++){const x=T.x0+i/500*(T.x1-T.x0);if(x>xe+.01)break;const y=f(x);if(!isFinite(y)){fi=true;continue;}if(fi){ctx.moveTo(T.tx(x),T.ty(y));fi=false;}else ctx.lineTo(T.tx(x),T.ty(y));}ctx.stroke();
+    ctx.strokeStyle=col.go;ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(T.tx(a),T.ty(T.y0));ctx.lineTo(T.tx(a),T.ty(T.y1));ctx.stroke();ctx.beginPath();ctx.moveTo(T.tx(b),T.ty(T.y0));ctx.lineTo(T.tx(b),T.ty(T.y1));ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=col.go;ctx.font='bold 11px DM Mono,monospace';ctx.textAlign='center';ctx.fillText('a='+a,T.tx(a),H-7);ctx.fillText('b='+b,T.tx(b),H-7);
+    ctx.fillStyle=col.ac;ctx.textAlign='left';ctx.font='11px DM Mono,monospace';ctx.fillText('f(x)='+fE,T.p+5,17);
+  };
+  rd1=()=>frame(1);zp('c1',rd1);
+  const done=()=>{const ap=riemann(f,a,b,n),ex=intg(f,a,b);document.getElementById('r1a').textContent=ap.toFixed(5);document.getElementById('r1e').textContent=ex.toFixed(5);document.getElementById('r1er').textContent=Math.abs(ap-ex).toFixed(5);const rows=[];for(let i=0;i<=Math.min(n,30);i++){const x=a+i*(b-a)/n;rows.push([x.toFixed(4),f(x).toFixed(5),(f(x)*(b-a)/n).toFixed(6)]);}mkTbl('tb1h','tb1b',['xᵢ','f(xᵢ)','f(xᵢ)·Δx'],rows);};
+  if(an)anim(1400,frame,done);else{frame(1);done();}
+}
 
-    function getDeriv(expr) {
-        try { return math.derivative(expr, 'x'); } catch { return null; }
+// ── DRAW 2 ──
+function draw2(an=false){
+  const fE=document.getElementById('f2').value,gE=document.getElementById('g2').value,a=+document.getElementById('a2').value,b=+document.getElementById('b2').value;
+  const el=document.getElementById('e2'),f=pf(fE),g=pf(gE);
+  if(!f||!g||isNaN(a)||isNaN(b)||a>=b){el.textContent='Hàm hoặc cận không hợp lệ.';el.classList.add('show');return;}el.classList.remove('show');
+  const{ctx,W,H}=gc('c2'),col=C();
+  const ys=[];for(let i=0;i<=300;i++){const x=a+i/300*(b-a);if(isFinite(f(x)))ys.push(f(x));if(isFinite(g(x)))ys.push(g(x));}
+  const mn=Math.min(...ys),mx=Math.max(...ys),yr=Math.max(Math.abs(mn),Math.abs(mx),.5);
+  const T=mkT(W,H,a-(b-a)*.08,b+(b-a)*.08,mn-yr*.22,mx+yr*.28);
+  const frame=prog=>{
+    clr(ctx,W,H,col);axes(ctx,T,col);
+    const xc=a+prog*(b-a);
+    ctx.beginPath();ctx.moveTo(T.tx(a),T.ty(f(a)));for(let i=1;i<=400;i++){const x=a+i/400*(xc-a);if(x>xc)break;ctx.lineTo(T.tx(x),T.ty(f(x)));}const xC=Math.min(xc,b);ctx.lineTo(T.tx(xC),T.ty(g(xC)));for(let i=400;i>=0;i--){const x=a+i/400*(xC-a);ctx.lineTo(T.tx(x),T.ty(g(x)));}ctx.closePath();const gr=ctx.createLinearGradient(0,0,0,H);gr.addColorStop(0,'rgba(108,99,255,.32)');gr.addColorStop(1,'rgba(0,229,176,.1)');ctx.fillStyle=gr;ctx.fill();
+    if(prog<1){const px=T.tx(xc),gw=ctx.createLinearGradient(px-14,0,px+4,0);gw.addColorStop(0,'rgba(108,99,255,0)');gw.addColorStop(1,'rgba(200,180,255,.4)');ctx.fillStyle=gw;ctx.fillRect(px-14,0,18,H);}
+    curve(ctx,f,T,col.c1);curve(ctx,g,T,col.c2);
+    ctx.strokeStyle=col.go;ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(T.tx(a),T.ty(T.y0));ctx.lineTo(T.tx(a),T.ty(T.y1));ctx.stroke();ctx.beginPath();ctx.moveTo(T.tx(b),T.ty(T.y0));ctx.lineTo(T.tx(b),T.ty(T.y1));ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=col.go;ctx.font='bold 11px DM Mono,monospace';ctx.textAlign='center';ctx.fillText('a='+a,T.tx(a),H-7);ctx.fillText('b='+b,T.tx(b),H-7);
+    ctx.fillStyle=col.c1;ctx.textAlign='left';ctx.font='11px DM Mono,monospace';ctx.fillText('f(x)='+fE,T.p+5,15);ctx.fillStyle=col.c2;ctx.fillText('g(x)='+gE,T.p+5,28);
+  };
+  const done=()=>{const S=intg(x=>Math.abs(f(x)-g(x)),a,b);document.getElementById('r2s').textContent=S.toFixed(5);document.getElementById('r2fa').textContent=f(a).toFixed(5);document.getElementById('r2ga').textContent=g(a).toFixed(5);};
+  if(an)anim(1200,frame,done);else{frame(1);done();}
+}
+
+// ── 3D PLOTLY ──
+let wireOn=false;
+function toggleWire(){wireOn=!wireOn;document.getElementById('bwire').textContent=wireOn?'⬡ Wire: BẬT':'⬡ Wireframe';build3d();}
+function build3d(){
+  const fE=document.getElementById('f3').value,a=+document.getElementById('a3').value,b=+document.getElementById('b3').value;
+  const el=document.getElementById('e3'),f=pf(fE);
+  if(!f||isNaN(a)||isNaN(b)||a>=b){el.textContent='Hàm không hợp lệ.';el.classList.add('show');return;}el.classList.remove('show');
+  const N=80,Np=80,xs=[],ys=[],zs=[];
+  for(let i=0;i<=N;i++){const xv=a+i/N*(b-a),r=Math.max(0,Math.abs(f(xv))),xr=[],yr=[],zr=[];for(let j=0;j<=Np;j++){const phi=j/Np*2*Math.PI;xr.push(xv);yr.push(r*Math.cos(phi));zr.push(r*Math.sin(phi));}xs.push(xr);ys.push(yr);zs.push(zr);}
+  const col=C();
+  Plotly.react('pld',[{type:'surface',x:xs,y:ys,z:zs,colorscale:[[0,'#4f46e5'],[.5,'#6c63ff'],[1,'#00e5b0']],opacity:wireOn?.4:.88,showscale:false,contours:{x:{show:wireOn},y:{show:wireOn},z:{show:wireOn}},lighting:{ambient:.5,diffuse:.8,specular:.4,roughness:.3},lightposition:{x:2,y:2,z:3}}],{paper_bgcolor:col.pb,plot_bgcolor:col.plb,scene:{bgcolor:col.plb,xaxis:{title:'x (trục xoay)',color:col.text,gridcolor:col.grid},yaxis:{title:'y',color:col.text,gridcolor:col.grid},zaxis:{title:'z',color:col.text,gridcolor:col.grid},camera:{eye:{x:1.8,y:1.5,z:1.2}},aspectmode:'data'},margin:{l:0,r:0,t:24,b:0},font:{family:'DM Mono,monospace',color:col.text}},{responsive:true,displayModeBar:true,modeBarButtonsToRemove:['toImage']});
+  let mR=0;for(let i=0;i<=200;i++){const x=a+i/200*(b-a),r=Math.abs(f(x));if(isFinite(r))mR=Math.max(mR,r);}
+  const V=intg(x=>Math.PI*f(x)*f(x),a,b);
+  document.getElementById('r3v').textContent=(V/Math.PI).toFixed(5);document.getElementById('r3vr').textContent=V.toFixed(5);document.getElementById('r3rm').textContent=mR.toFixed(4);
+}
+
+// ── DRAW 4 (SHELLS) ──
+function draw4(an=false){
+  const fE=document.getElementById('f4').value,a=Math.max(0,+document.getElementById('a4').value),b=+document.getElementById('b4').value;
+  const el=document.getElementById('e4'),f=pf(fE);
+  if(!f||isNaN(a)||isNaN(b)||a>=b){el.textContent='Hàm không hợp lệ.';el.classList.add('show');return;}el.classList.remove('show');
+  const{ctx,W,H}=gc('c4'),col=C(),T=autoT(f,a,b,W,H);
+  const n=30;
+  const frame=prog=>{
+    clr(ctx,W,H,col);axes(ctx,T,col);
+    const dx=(b-a)/n,cnt=Math.ceil(prog*n);
+    for(let i=0;i<cnt;i++){
+      const xi=a+i*dx,xm=xi+dx/2,yi=f(xm),frac=i===cnt-1?((prog*n)%1||1):1;
+      const px0=T.tx(xi),px1=T.tx(xi+dx),py0=T.ty(0),pyH=T.ty(Math.max(0,yi));
+      const rh=(py0-pyH)*frac;
+      ctx.fillStyle=`hsla(${240+i/n*60},70%,65%,${.32*frac})`;ctx.fillRect(px0,py0-rh,px1-px0,rh);
+      ctx.strokeStyle=`hsla(${240+i/n*60},80%,70%,.7)`;ctx.lineWidth=1;ctx.strokeRect(px0,py0-rh,px1-px0,rh);
+      // radius line
+      if(frac===1&&yi>0){ctx.strokeStyle=col.go;ctx.lineWidth=.8;ctx.setLineDash([3,2]);ctx.beginPath();ctx.moveTo(T.tx(xm),T.ty(0));ctx.lineTo(T.tx(xm),T.ty(yi));ctx.stroke();ctx.setLineDash([]);}
     }
+    curve(ctx,f,T,col.ac,2.5);
+    ctx.strokeStyle=col.go;ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(T.tx(a),T.ty(T.y0));ctx.lineTo(T.tx(a),T.ty(T.y1));ctx.stroke();ctx.beginPath();ctx.moveTo(T.tx(b),T.ty(T.y0));ctx.lineTo(T.tx(b),T.ty(T.y1));ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=col.go;ctx.font='bold 11px DM Mono,monospace';ctx.textAlign='center';ctx.fillText('a='+a,T.tx(a),H-7);ctx.fillText('b='+b,T.tx(b),H-7);
+    ctx.fillStyle=col.ac;ctx.textAlign='left';ctx.font='11px DM Mono,monospace';ctx.fillText('f(x)='+fE,T.p+5,15);ctx.fillStyle=col.text;ctx.fillText('V = 2π∫x·f(x)dx',T.p+5,28);
+  };
+  const done=()=>{const V=intg(x=>2*Math.PI*x*f(x),a,b);document.getElementById('r4v').textContent=V.toFixed(5);document.getElementById('r4i').textContent=intg(x=>x*f(x),a,b).toFixed(5);};
+  if(an)anim(1600,frame,done);else{frame(1);done();}
+}
 
-    // --- CHUYỂN TAB ---
-    function switchTab(id, btn) {
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        btn.classList.add('active');
-        if(id === 't3') solveVolume3D();
-    }
+// ── DRAW 5 (ARC LENGTH) ──
+function draw5(an=false){
+  const fE=document.getElementById('f5').value,a=+document.getElementById('a5').value,b=+document.getElementById('b5').value;
+  const el=document.getElementById('e5'),f=pf(fE),df=deriv(fE);
+  if(!f||!df||isNaN(a)||isNaN(b)||a>=b){el.textContent=!f?'Hàm không hợp lệ.':'Không tính được đạo hàm.';el.classList.add('show');return;}el.classList.remove('show');
+  const{ctx,W,H}=gc('c5'),col=C(),T=autoT(f,a,b,W,H);
+  const frame=prog=>{
+    clr(ctx,W,H,col);axes(ctx,T,col);
+    const xe=a+prog*(b-a);
+    // thick glow arc
+    ctx.strokeStyle=col.f2.replace('.13','0.22');ctx.lineWidth=11;ctx.globalAlpha=.28;ctx.beginPath();let fi=true;for(let i=0;i<=600;i++){const x=a+i/600*(b-a);if(x>xe)break;const y=f(x);if(!isFinite(y)){fi=true;continue;}if(fi){ctx.moveTo(T.tx(x),T.ty(y));fi=false;}else ctx.lineTo(T.tx(x),T.ty(y));}ctx.stroke();ctx.globalAlpha=1;
+    // faint full
+    curve(ctx,f,T,col.axis.replace('.18','.25'),1);
+    // bold arc so far
+    ctx.strokeStyle=col.ac;ctx.lineWidth=3;ctx.beginPath();fi=true;for(let i=0;i<=600;i++){const x=a+i/600*(b-a);if(x>xe)break;const y=f(x);if(!isFinite(y)){fi=true;continue;}if(fi){ctx.moveTo(T.tx(x),T.ty(y));fi=false;}else ctx.lineTo(T.tx(x),T.ty(y));}ctx.stroke();
+    // tangent lines
+    const step=Math.max(1,Math.floor(600*prog/18));
+    for(let i=0;i<18;i++){const idx=i*step;if(idx>=600*prog)break;const x=a+idx/600*(b-a),y=f(x),sl=df(x);if(!isFinite(y)||!isFinite(sl))continue;const len=.14*(b-a)/18;ctx.strokeStyle=col.go;ctx.lineWidth=.9;ctx.globalAlpha=.55;ctx.beginPath();ctx.moveTo(T.tx(x-len),T.ty(y-sl*len));ctx.lineTo(T.tx(x+len),T.ty(y+sl*len));ctx.stroke();ctx.globalAlpha=1;}
+    ctx.strokeStyle=col.go;ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(T.tx(a),T.ty(T.y0));ctx.lineTo(T.tx(a),T.ty(T.y1));ctx.stroke();ctx.beginPath();ctx.moveTo(T.tx(b),T.ty(T.y0));ctx.lineTo(T.tx(b),T.ty(T.y1));ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=col.go;ctx.font='bold 11px DM Mono,monospace';ctx.textAlign='center';ctx.fillText('a='+a,T.tx(a),H-7);ctx.fillText('b='+b,T.tx(b),H-7);
+    ctx.fillStyle=col.ac;ctx.textAlign='left';ctx.font='11px DM Mono,monospace';ctx.fillText('f(x)='+fE,T.p+5,15);
+    try{ctx.fillStyle=col.text;ctx.fillText("f'(x)="+math.derivative(fE,'x').toString(),T.p+5,28);}catch{}
+  };
+  const done=()=>{
+    const L=intg(x=>Math.sqrt(1+df(x)**2),a,b);
+    document.getElementById('r5l').textContent=L.toFixed(6);document.getElementById('r5da').textContent=df(a).toFixed(5);document.getElementById('r5db').textContent=df(b).toFixed(5);
+    const rows=[];for(let i=0;i<=20;i++){const x=a+i/20*(b-a),dv=df(x);rows.push([x.toFixed(4),f(x).toFixed(5),dv.toFixed(5),Math.sqrt(1+dv**2).toFixed(5)]);}
+    mkTbl('tb5h','tb5b',['x','f(x)',"f'(x)","√(1+f'²)"],rows);
+  };
+  if(an)anim(1600,frame,done);else{frame(1);done();}
+}
 
-    // --- VẼ CANVAS 2D CHUNG ---
-    function draw2D(canvasId, fExpr, a, b, fillArea = false) {
-        const canvas = document.getElementById(canvasId);
-        const ctx = canvas.getContext('2d');
-        const W = canvas.width, H = canvas.height;
-        ctx.clearRect(0,0,W,H);
+// ── DRAW 6 (SURFACE AREA) ──
+function upFb6(){const ax=document.getElementById('ax6').value,el=document.getElementById('fb6');el.innerHTML=ax==='ox'?'S = <span>2π ∫ₐᵇ f(x)·√(1+[f′(x)]²) dx</span> (xoay quanh Ox)':'S = <span>2π ∫ₐᵇ x·√(1+[f′(x)]²) dx</span> (xoay quanh Oy)';}
+function draw6(){
+  const fE=document.getElementById('f6').value,a=+document.getElementById('a6').value,b=+document.getElementById('b6').value,ax=document.getElementById('ax6').value;
+  const el=document.getElementById('e6'),f=pf(fE),df=deriv(fE);
+  if(!f||!df||isNaN(a)||isNaN(b)||a>=b){el.textContent='Hàm không hợp lệ.';el.classList.add('show');return;}el.classList.remove('show');
+  const{ctx,W,H}=gc('c6'),col=C(),T=autoT(f,a,b,W,H);
+  clr(ctx,W,H,col);axes(ctx,T,col);
+  ctx.beginPath();ctx.moveTo(T.tx(a),T.ty(0));for(let i=0;i<=400;i++){const x=a+i/400*(b-a);ctx.lineTo(T.tx(x),T.ty(f(x)));}ctx.lineTo(T.tx(b),T.ty(0));ctx.closePath();const gr=ctx.createLinearGradient(0,0,0,H);gr.addColorStop(0,'rgba(108,99,255,.22)');gr.addColorStop(1,'rgba(0,229,176,.06)');ctx.fillStyle=gr;ctx.fill();
+  for(let i=0;i<=28;i++){const x=a+i/28*(b-a),y=f(x),sl=df(x);if(!isFinite(y)||!isFinite(sl))continue;const len=.1*(b-a)/28,nx=-sl/Math.sqrt(1+sl**2)*len,ny=1/Math.sqrt(1+sl**2)*len;ctx.strokeStyle=col.ac;ctx.lineWidth=1.2;ctx.globalAlpha=.4;ctx.beginPath();ctx.moveTo(T.tx(x),T.ty(y));ctx.lineTo(T.tx(x+nx),T.ty(y+ny));ctx.stroke();ctx.globalAlpha=1;}
+  curve(ctx,f,T,col.c1,2.5);
+  ctx.strokeStyle=col.go;ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(T.tx(a),T.ty(T.y0));ctx.lineTo(T.tx(a),T.ty(T.y1));ctx.stroke();ctx.beginPath();ctx.moveTo(T.tx(b),T.ty(T.y0));ctx.lineTo(T.tx(b),T.ty(T.y1));ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=col.go;ctx.font='bold 11px DM Mono,monospace';ctx.textAlign='center';ctx.fillText('a='+a,T.tx(a),H-7);ctx.fillText('b='+b,T.tx(b),H-7);
+  const ig=ax==='ox'?x=>2*Math.PI*Math.abs(f(x))*Math.sqrt(1+df(x)**2):x=>2*Math.PI*x*Math.sqrt(1+df(x)**2);
+  const S=intg(ig,a,b);document.getElementById('r6s').textContent=S.toFixed(6);document.getElementById('r6p').textContent=(S/(2*Math.PI)).toFixed(6);
+}
 
-        // Vẽ hệ trục tọa độ đơn giản
-        const pad = 40;
-        const scaleX = (W - 2*pad) / (b - a || 1);
-        const tX = x => pad + (x - a) * scaleX;
+// ── DRAW PARAMETRIC ──
+function drawP(an=false){
+  const xtE=document.getElementById('xt').value,ytE=document.getElementById('yt').value,t0=+document.getElementById('t0').value,t1=+document.getElementById('t1v').value;
+  const el=document.getElementById('e7p'),fx=pf2(xtE,'t'),fy=pf2(ytE,'t');
+  if(!fx||!fy||isNaN(t0)||isNaN(t1)||t0>=t1){el.textContent='Hàm hoặc tham số không hợp lệ.';el.classList.add('show');return;}el.classList.remove('show');
+  const{ctx,W,H}=gc('c7p'),col=C(),N=600;
+  const xs=[],ys=[];for(let i=0;i<=N;i++){const t=t0+i/N*(t1-t0);xs.push(fx(t));ys.push(fy(t));}
+  const xmn=Math.min(...xs.filter(isFinite)),xmx=Math.max(...xs.filter(isFinite)),ymn=Math.min(...ys.filter(isFinite)),ymx=Math.max(...ys.filter(isFinite));
+  const xp=(xmx-xmn)*.12,yp=(ymx-ymn)*.12;
+  const T=mkT(W,H,xmn-xp,xmx+xp,ymn-yp,ymx+yp);
+  const frame=prog=>{
+    clr(ctx,W,H,col);axes(ctx,T,col);
+    const cnt=Math.floor(prog*N);
+    for(let i=0;i<cnt-1;i++){const hue=240+i/N*120;ctx.strokeStyle=`hsla(${hue},70%,65%,.85)`;ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(T.tx(xs[i]),T.ty(ys[i]));ctx.lineTo(T.tx(xs[i+1]),T.ty(ys[i+1]));ctx.stroke();}
+    if(cnt>0){ctx.fillStyle=col.ac;ctx.beginPath();ctx.arc(T.tx(xs[cnt-1]),T.ty(ys[cnt-1]),4,0,2*Math.PI);ctx.fill();}
+    ctx.fillStyle=col.ac;ctx.textAlign='left';ctx.font='11px DM Mono,monospace';ctx.fillText('x(t)='+xtE,T.p+5,15);ctx.fillStyle=col.text;ctx.fillText('y(t)='+ytE,T.p+5,28);
+  };
+  const done=()=>{const L=intg(t=>{const h=.002,dx=(fx(t+h)-fx(t-h))/(2*h),dy=(fy(t+h)-fy(t-h))/(2*h);return Math.sqrt(dx**2+dy**2);},t0,t1);const A=Math.abs(intg(t=>{const h=.002,dx=(fx(t+h)-fx(t-h))/(2*h);return fy(t)*dx;},t0,t1));document.getElementById('r7pl').textContent=L.toFixed(5);document.getElementById('r7pa').textContent=A.toFixed(5);};
+  if(an)anim(1800,frame,done);else{frame(1);done();}
+}
 
-        let ys = [];
-        for(let i=0; i<=100; i++) {
-            let y = safeEval(fExpr, a + (i/100)*(b-a));
-            if(isFinite(y)) ys.push(y);
-        }
-        let minY = Math.min(...ys, 0), maxY = Math.max(...ys, 1);
-        const scaleY = (H - 2*pad) / (maxY - minY || 1);
-        const tY = y => H - pad - (y - minY) * scaleY;
+// ── DRAW POLAR ──
+function drawR(an=false){
+  const rE=document.getElementById('rt').value,th0=+document.getElementById('th0').value,th1=+document.getElementById('th1').value;
+  const el=document.getElementById('e7r'),rf=pf2(rE,'theta');
+  if(!rf||isNaN(th0)||isNaN(th1)||th0>=th1){el.textContent='Hàm hoặc giới hạn không hợp lệ.';el.classList.add('show');return;}el.classList.remove('show');
+  const{ctx,W,H}=gc('c7r'),col=C(),N=600;
+  let mR=0;for(let i=0;i<=N;i++){const r=Math.abs(rf(th0+i/N*(th1-th0)));if(isFinite(r))mR=Math.max(mR,r);}
+  const pad=46,sz=Math.min(W,H)-pad*2,cx=W/2,cy=H/2,sc=sz/2/Math.max(mR,.1);
+  const frame=prog=>{
+    clr(ctx,W,H,col);
+    // polar grid
+    ctx.strokeStyle=col.grid;ctx.lineWidth=.5;for(let r=1;r<=Math.ceil(mR);r++){ctx.beginPath();ctx.arc(cx,cy,r*sc,0,2*Math.PI);ctx.stroke();}for(let a=0;a<12;a++){const ang=a/12*2*Math.PI;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(ang)*sz/2,cy-Math.sin(ang)*sz/2);ctx.stroke();}
+    ctx.strokeStyle=col.axis;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(pad,cy);ctx.lineTo(W-pad,cy);ctx.stroke();ctx.beginPath();ctx.moveTo(cx,pad);ctx.lineTo(cx,H-pad);ctx.stroke();
+    const cnt=Math.floor(prog*N);
+    ctx.beginPath();ctx.moveTo(cx,cy);for(let i=0;i<=cnt;i++){const th=th0+i/N*(th1-th0),r=rf(th);ctx.lineTo(cx+r*Math.cos(th)*sc,cy-r*Math.sin(th)*sc);}ctx.closePath();const gr=ctx.createRadialGradient(cx,cy,0,cx,cy,mR*sc);gr.addColorStop(0,'rgba(108,99,255,.32)');gr.addColorStop(1,'rgba(0,229,176,.06)');ctx.fillStyle=gr;ctx.fill();
+    ctx.strokeStyle=col.ac;ctx.lineWidth=2.5;ctx.beginPath();let fi=true;for(let i=0;i<=cnt;i++){const th=th0+i/N*(th1-th0),r=rf(th),px=cx+r*Math.cos(th)*sc,py=cy-r*Math.sin(th)*sc;if(fi){ctx.moveTo(px,py);fi=false;}else ctx.lineTo(px,py);}ctx.stroke();
+    if(cnt>0){ctx.fillStyle=col.ac;ctx.beginPath();const th=th0+cnt/N*(th1-th0),r=rf(th);ctx.arc(cx+r*Math.cos(th)*sc,cy-r*Math.sin(th)*sc,4,0,2*Math.PI);ctx.fill();}
+    ctx.fillStyle=col.text;ctx.font='11px DM Mono,monospace';ctx.textAlign='left';ctx.fillText('r(θ)='+rE,pad+4,15);
+    ctx.textAlign='center';ctx.fillStyle=col.text;ctx.font='10px DM Mono,monospace';for(let r=1;r<=Math.ceil(mR);r++)ctx.fillText(r,cx+r*sc+4,cy-3);
+  };
+  const done=()=>{const A=intg(th=>.5*rf(th)**2,th0,th1);document.getElementById('r7ra').textContent=A.toFixed(5);document.getElementById('r7rm').textContent=mR.toFixed(4);};
+  if(an)anim(1800,frame,done);else{frame(1);done();}
+}
 
-        // Vẽ đường cong
-        ctx.beginPath();
-        ctx.strokeStyle = '#00e5b0';
-        ctx.lineWidth = 3;
-        for(let i=0; i<=200; i++){
-            let x = a + (i/200)*(b-a);
-            let y = safeEval(fExpr, x);
-            if(i===0) ctx.moveTo(tX(x), tY(y)); else ctx.lineTo(tX(x), tY(y));
-        }
-        ctx.stroke();
+// ── PRESETS ──
+function preset(t,n){
+  if(t==='p'){const P={cardioid:{xt:'2*(1-cos(t))*cos(t)',yt:'2*(1-cos(t))*sin(t)',t0:0,t1:6.2832},lissajous:{xt:'sin(3*t)',yt:'sin(2*t)',t0:0,t1:6.2832},spiral:{xt:'t*cos(t)',yt:'t*sin(t)',t0:0,t1:12.566}};const s=P[n];if(!s)return;document.getElementById('xt').value=s.xt;document.getElementById('yt').value=s.yt;document.getElementById('t0').value=s.t0;document.getElementById('t1v').value=s.t1;drawP(true);}
+  else{const P={cardioid:{r:'1+cos(theta)',th0:0,th1:6.2832},rose4:{r:'cos(2*theta)',th0:0,th1:6.2832},lemniscate:{r:'sqrt(abs(cos(2*theta)))',th0:0,th1:6.2832}};const s=P[n];if(!s)return;document.getElementById('rt').value=s.r;document.getElementById('th0').value=s.th0;document.getElementById('th1').value=s.th1;drawR(true);}
+}
 
-        if(fillArea) {
-            ctx.lineTo(tX(b), tY(0));
-            ctx.lineTo(tX(a), tY(0));
-            ctx.fillStyle = 'rgba(108,99,255,0.2)';
-            ctx.fill();
-        }
-    }
+// ── EXPORT ──
+function xpng(id,nm){const c=document.getElementById(id);if(!c)return;const a=document.createElement('a');a.download=nm+'.png';a.href=c.toDataURL('image/png');a.click();}
 
-    // --- LOGIC CHI TIẾT ---
-    function solveArea() {
-        const f = document.getElementById('f1').value;
-        const a = parseFloat(document.getElementById('a1').value);
-        const b = parseFloat(document.getElementById('b1').value);
-        
-        let sum = 0, steps = 1000, dx = (b-a)/steps;
-        for(let i=0; i<steps; i++) sum += Math.abs(safeEval(f, a + i*dx)) * dx;
-        
-        document.getElementById('r1s').textContent = sum.toFixed(5);
-        draw2D('c1', f, a, b, true);
-    }
+// ── TAB SWITCH ──
+function switchTab(id,btn){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('#maintabs>.tab').forEach(t=>t.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');setTimeout(()=>{const m={t1:()=>draw1(false),t2:()=>draw2(false),t4:()=>draw4(false),t5:()=>draw5(false),t6:()=>draw6()};if(m[id])m[id]();},30);}
+function switchSub(id,btn){document.querySelectorAll('.sp').forEach(p=>p.classList.remove('active'));document.querySelectorAll('#t7 .tabs .tab').forEach(t=>t.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');}
 
-    function solveArcLength() {
-        const f = document.getElementById('f2').value;
-        const a = parseFloat(document.getElementById('a2').value);
-        const b = parseFloat(document.getElementById('b2').value);
-        const df = getDeriv(f);
-
-        if(!df) return;
-        document.getElementById('r2df').textContent = "f'(x) = " + df.toString();
-
-        let L = 0, steps = 1000, dx = (b-a)/steps;
-        for(let i=0; i<steps; i++){
-            let dVal = df.evaluate({x: a + i*dx});
-            L += Math.sqrt(1 + dVal*dVal) * dx;
-        }
-        document.getElementById('r2l').textContent = L.toFixed(5);
-        draw2D('c2', f, a, b);
-    }
-
-    function solveVolume3D() {
-        if (typeof Plotly === 'undefined') return;
-
-        const fE = document.getElementById('f3').value;
-        const a = parseFloat(document.getElementById('a3').value);
-        const b = parseFloat(document.getElementById('b3').value);
-        
-        // Dữ liệu Plotly
-        let xArr = [], yArr = [], zArr = [];
-        let n = 40, m = 40;
-        for(let i=0; i<=n; i++){
-            let x = a + (i/n)*(b-a);
-            let r = Math.abs(safeEval(fE, x));
-            let xRow = [], yRow = [], zRow = [];
-            for(let j=0; j<=m; j++){
-                let phi = (j/m) * 2 * Math.PI;
-                xRow.push(x);
-                yRow.push(r * Math.cos(phi));
-                zRow.push(r * Math.sin(phi));
-            }
-            xArr.push(xRow); yArr.push(yRow); zArr.push(zRow);
-        }
-
-        const data = [{ type: 'surface', x: xArr, y: yArr, z: zArr, colorscale: 'Viridis' }];
-        Plotly.newPlot('plot3d', data, { 
-            paper_bgcolor: 'rgba(0,0,0,0)', 
-            plot_bgcolor: 'rgba(0,0,0,0)',
-            margin: {l:0,r:0,b:0,t:0},
-            scene: { xaxis:{color:'#7a8099'}, yaxis:{color:'#7a8099'}, zaxis:{color:'#7a8099'} }
-        });
-
-        // Tính V
-        let V = 0, steps = 1000, dx = (b-a)/steps;
-        for(let i=0; i<steps; i++) {
-            let y = safeEval(fE, a + i*dx);
-            V += Math.PI * y * y * dx;
-        }
-        document.getElementById('r3v').textContent = V.toFixed(5);
-    }
-
-    function solveVolumeOy() {
-        const f = document.getElementById('f4').value;
-        const a = parseFloat(document.getElementById('a4').value);
-        const b = parseFloat(document.getElementById('b4').value);
-        let V = 0, steps = 1000, dx = (b-a)/steps;
-        for(let i=0; i<steps; i++){
-            let x = a + i*dx;
-            V += 2 * Math.PI * x * Math.abs(safeEval(f, x)) * dx;
-        }
-        document.getElementById('r4v').textContent = V.toFixed(5);
-    }
-
-    function solveSurface() {
-        const f = document.getElementById('f5').value;
-        const a = parseFloat(document.getElementById('a5').value);
-        const b = parseFloat(document.getElementById('b5').value);
-        const df = getDeriv(f);
-        let S = 0, steps = 1000, dx = (b-a)/steps;
-        for(let i=0; i<steps; i++){
-            let x = a + i*dx;
-            let y = Math.abs(safeEval(f, x));
-            let dVal = df.evaluate({x: x});
-            S += 2 * Math.PI * y * Math.sqrt(1 + dVal*dVal) * dx;
-        }
-        document.getElementById('r5s').textContent = S.toFixed(5);
-    }
-
-    // Khởi tạo
-    window.onload = solveArea;
+window.addEventListener('load',()=>{draw1(false);zp('c1',()=>draw1(false));});
 </script>
-
 </body>
 </html>
