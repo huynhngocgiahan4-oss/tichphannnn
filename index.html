@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tích Phân Trực Quan Pro - Giải Tích 12</title>
+<title>Tích Phân Trực Quan Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
-<!-- Tích hợp Math.js cho đạo hàm và parse hàm số an toàn -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
 <style>
   :root {
@@ -24,65 +23,42 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--text);font-family:'Be Vietnam Pro',sans-serif;min-height:100vh;overflow-x:hidden}
-
   body::before{
     content:'';position:fixed;inset:0;
     background-image:linear-gradient(rgba(108,99,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(108,99,255,0.03) 1px,transparent 1px);
     background-size:48px 48px;pointer-events:none;z-index:0
   }
-
   .wrap{max-width:1000px;margin:0 auto;padding:40px 20px;position:relative;z-index:1}
-
   header{text-align:center;margin-bottom:48px}
   .badge{display:inline-block;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent2);background:rgba(0,229,176,0.1);border:1px solid rgba(0,229,176,0.2);padding:5px 14px;border-radius:100px;margin-bottom:20px}
   h1{font-family:'DM Serif Display',serif;font-size:clamp(32px,5vw,56px);line-height:1.05;background:linear-gradient(135deg,#fff 0%,#a8a8ff 50%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px}
-  .subtitle{color:var(--muted);font-size:15px;font-weight:300;letter-spacing:0.3px}
-
   .tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:5px;margin-bottom:32px;flex-wrap:wrap}
   .tab{flex:1;min-width:140px;padding:10px 12px;border:none;background:transparent;color:var(--muted);font-family:'Be Vietnam Pro',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border-radius:9px;transition:all .2s;white-space:nowrap;text-align:center}
-  .tab:hover{color:var(--text);background:var(--surface2)}
   .tab.active{background:linear-gradient(135deg,var(--accent),#8b83ff);color:#fff;box-shadow:0 4px 16px rgba(108,99,255,0.35)}
-
   .panel{display:none}.panel.active{display:block}
-
   .input-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
   .field{display:flex;flex-direction:column;gap:6px}
   .field label{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace}
   .field input{background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'DM Mono',monospace;font-size:14px;outline:none;transition:border .2s}
-  .field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,0.15)}
-
-  .actions{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-  .btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:9px;font-family:'Be Vietnam Pro',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;white-space:nowrap}
-  .btn-primary{background:linear-gradient(135deg,var(--accent),#8b83ff);color:#fff;box-shadow:0 4px 14px rgba(108,99,255,0.4)}
-  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(108,99,255,0.5)}
-  .btn-export{background:rgba(0,229,176,0.1);border:1px solid rgba(0,229,176,0.25);color:var(--accent2)}
-
+  .actions{display:flex;gap:10px;margin-bottom:20px}
+  .btn{display:inline-flex;align-items:center;padding:10px 20px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;border:none}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),#8b83ff);color:#fff}
   .canvas-wrap{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px}
-  .canvas-wrap canvas{display:block;width:100%;height:auto}
-  .canvas-label{position:absolute;top:12px;left:14px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
-
+  .canvas-wrap canvas{display:block;width:100%}
   .result-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px}
   .rcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
-  .rcard .rlabel{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+  .rcard .rlabel{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
   .rcard .rval{font-size:20px;font-weight:600;font-family:'DM Mono',monospace;color:var(--text)}
-  .rcard.accent{border-color:rgba(108,99,255,0.3);background:rgba(108,99,255,0.07)}
   .rcard.accent .rval{color:var(--accent2)}
-
-  .formula-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:20px;font-family:'DM Mono',monospace;font-size:13px;color:var(--muted);line-height:1.7}
+  .formula-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:20px;font-family:'DM Mono',monospace;font-size:13px;color:var(--muted)}
   .formula-box span{color:var(--accent2)}
-
-  .errmsg{background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.25);color:#ff9999;border-radius:9px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
-  .errmsg.show{display:block}
-
-  footer{margin-top:60px;text-align:center;font-size:12px;color:var(--muted);padding-bottom:40px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div class="badge">Công cụ học tập nâng cao</div>
-    <h1>Ứng dụng Tích phân<br><em>Đa Năng</em></h1>
-    <p class="subtitle">Tính toán & Trực quan hóa mọi bài toán Giải tích</p>
+    <h1>Tích Phân<br><em>Đa Năng Pro</em></h1>
   </header>
 
   <div class="tabs">
@@ -93,45 +69,35 @@
     <button class="tab" onclick="switchTab('t5',this)">🏺 Diện tích mặt</button>
   </div>
 
-  <!-- TAB 1: DIỆN TÍCH -->
   <div id="t1" class="panel active">
     <div class="formula-box">S = <span>∫ₐᵇ |f(x)| dx</span></div>
-    <div id="err1" class="errmsg"></div>
     <div class="input-grid">
       <div class="field"><label>f(x)</label><input id="f1" value="x^2 - 2x"></div>
       <div class="field"><label>Cận a</label><input id="a1" type="number" value="0"></div>
       <div class="field"><label>Cận b</label><input id="b1" type="number" value="3"></div>
     </div>
-    <div class="actions">
-      <button class="btn btn-primary" onclick="draw(1)">▶ Thực hiện</button>
-      <button class="btn btn-export" onclick="exportPNG('c1')">⬇ Lưu ảnh</button>
-    </div>
-    <div class="canvas-wrap"><canvas id="c1" width="880" height="400"></canvas></div>
+    <div class="actions"><button class="btn btn-primary" onclick="process(1)">▶ Thực hiện</button></div>
+    <div class="canvas-wrap"><canvas id="c1" height="400"></canvas></div>
     <div class="result-cards">
       <div class="rcard accent"><div class="rlabel">Diện tích S</div><div class="rval" id="r1s">—</div></div>
     </div>
   </div>
 
-  <!-- TAB 2: ĐỘ DÀI CUNG -->
   <div id="t2" class="panel">
     <div class="formula-box">L = <span>∫ₐᵇ √(1 + [f'(x)]²) dx</span></div>
-    <div id="err2" class="errmsg"></div>
     <div class="input-grid">
       <div class="field"><label>f(x)</label><input id="f2" value="x^(3/2)"></div>
       <div class="field"><label>Cận a</label><input id="a2" type="number" value="0"></div>
       <div class="field"><label>Cận b</label><input id="b2" type="number" value="4"></div>
     </div>
-    <div class="actions">
-      <button class="btn btn-primary" onclick="draw(2)">▶ Thực hiện</button>
-    </div>
-    <div class="canvas-wrap"><canvas id="c2" width="880" height="400"></canvas></div>
+    <div class="actions"><button class="btn btn-primary" onclick="process(2)">▶ Thực hiện</button></div>
+    <div class="canvas-wrap"><canvas id="c2" height="400"></canvas></div>
     <div class="result-cards">
       <div class="rcard accent"><div class="rlabel">Độ dài L</div><div class="rval" id="r2l">—</div></div>
       <div class="rcard"><div class="rlabel">Đạo hàm f'(x)</div><div class="rval" id="r2df" style="font-size:14px">—</div></div>
     </div>
   </div>
 
-  <!-- TAB 3: XOAY OX (MẶT CẮT ĐĨA) -->
   <div id="t3" class="panel">
     <div class="formula-box">V = <span>π ∫ₐᵇ [f(x)]² dx</span></div>
     <div class="input-grid">
@@ -139,29 +105,27 @@
       <div class="field"><label>Cận a</label><input id="a3" type="number" value="0"></div>
       <div class="field"><label>Cận b</label><input id="b3" type="number" value="4"></div>
     </div>
-    <div class="actions"><button class="btn btn-primary" onclick="draw(3)">▶ Thực hiện</button></div>
-    <div class="canvas-wrap"><canvas id="c3" width="880" height="400"></canvas></div>
+    <div class="actions"><button class="btn btn-primary" onclick="process(3)">▶ Thực hiện</button></div>
+    <div class="canvas-wrap"><canvas id="c3" height="400"></canvas></div>
     <div class="result-cards">
       <div class="rcard accent"><div class="rlabel">Thể tích V</div><div class="rval" id="r3v">—</div></div>
     </div>
   </div>
 
-  <!-- TAB 4: XOAY OY (VỎ TRỤ) -->
   <div id="t4" class="panel">
     <div class="formula-box">V = <span>2π ∫ₐᵇ x |f(x)| dx</span></div>
     <div class="input-grid">
       <div class="field"><label>f(x)</label><input id="f4" value="sin(x)"></div>
       <div class="field"><label>Cận a</label><input id="a4" type="number" value="0"></div>
-      <div class="field"><label>Cận b</label><input id="b4" type="number" value="3.14"></div>
+      <div class="field"><label>Cận b</label><input id="b4" type="number" value="3.14159"></div>
     </div>
-    <div class="actions"><button class="btn btn-primary" onclick="draw(4)">▶ Thực hiện</button></div>
-    <div class="canvas-wrap"><canvas id="c4" width="880" height="400"></canvas></div>
+    <div class="actions"><button class="btn btn-primary" onclick="process(4)">▶ Thực hiện</button></div>
+    <div class="canvas-wrap"><canvas id="c4" height="400"></canvas></div>
     <div class="result-cards">
-      <div class="rcard accent"><div class="rlabel">Thể tích V</div><div class="rval" id="r4v">—</div></div>
+      <div class="rcard accent"><div class="rlabel">Thể tích V (Oy)</div><div class="rval" id="r4v">—</div></div>
     </div>
   </div>
 
-  <!-- TAB 5: DIỆN TÍCH MẶT TRÒN XOAY -->
   <div id="t5" class="panel">
     <div class="formula-box">S = <span>2π ∫ₐᵇ |f(x)| √(1 + [f'(x)]²) dx</span></div>
     <div class="input-grid">
@@ -169,19 +133,18 @@
       <div class="field"><label>Cận a</label><input id="a5" type="number" value="-2"></div>
       <div class="field"><label>Cận b</label><input id="b5" type="number" value="2"></div>
     </div>
-    <div class="actions"><button class="btn btn-primary" onclick="draw(5)">▶ Thực hiện</button></div>
-    <div class="canvas-wrap"><canvas id="c5" width="880" height="400"></canvas></div>
+    <div class="actions"><button class="btn btn-primary" onclick="process(5)">▶ Thực hiện</button></div>
+    <div class="canvas-wrap"><canvas id="c5" height="400"></canvas></div>
     <div class="result-cards">
       <div class="rcard accent"><div class="rlabel">Diện tích mặt S</div><div class="rval" id="r5s">—</div></div>
     </div>
   </div>
 
-  <footer>Tích Phân Đa Năng v2.0 - Tích hợp Math.js</footer>
+  <footer>Tích Phân Trực Quan v2.0 - Sức mạnh từ Math.js</footer>
 </div>
 
 <script>
-const parser = math.parser();
-
+// Sử dụng Math.js để xử lý biểu thức
 function evaluateFn(expr, xVal) {
   try { return math.evaluate(expr, { x: xVal }); } catch { return NaN; }
 }
@@ -190,44 +153,32 @@ function getDerivativeStr(expr) {
   try { return math.derivative(expr, 'x').toString(); } catch { return "N/A"; }
 }
 
-function integrate(fnExpr, a, b, steps = 1000) {
-  let area = 0;
-  const dx = (b - a) / steps;
-  for (let i = 0; i < steps; i++) {
-    let x = a + (i + 0.5) * dx;
-    let y = math.evaluate(fnExpr, { x: x });
-    area += Math.abs(y) * dx;
-  }
-  return area;
-}
-
-// Logic cho từng tab
-function draw(tabNum) {
-  const fExpr = document.getElementById(`f${tabNum}`).value;
-  const a = parseFloat(document.getElementById(`a${tabNum}`).value);
-  const b = parseFloat(document.getElementById(`b${tabNum}`).value);
-  const canvas = document.getElementById(`c${tabNum}`);
+function process(tab) {
+  const fExpr = document.getElementById(`f${tab}`).value;
+  const a = parseFloat(document.getElementById(`a${tab}`).value);
+  const b = parseFloat(document.getElementById(`b${tab}`).value);
+  const canvas = document.getElementById(`c${tab}`);
   const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
+  const W = canvas.width = 880, H = canvas.height = 400;
 
+  // Xóa canvas
   ctx.fillStyle = '#0d0f14'; ctx.fillRect(0, 0, W, H);
 
-  // Vẽ trục tọa độ cơ bản
+  // Thiết lập tỷ lệ vẽ (Scale)
   const pad = 50;
   const scaleX = (W - 2*pad) / (Math.abs(b-a) || 1);
   const tX = x => pad + (x - a) * scaleX;
 
-  // Tìm y min/max để scale
   let ys = [];
   for(let i=0; i<=100; i++) {
-    let val = evaluateFn(fExpr, a + (i/100)*(b-a));
-    if(isFinite(val)) ys.push(val);
+    let v = evaluateFn(fExpr, a + (i/100)*(b-a));
+    if(isFinite(v)) ys.push(v);
   }
   let minY = Math.min(...ys, 0), maxY = Math.max(...ys, 1);
   const scaleY = (H - 2*pad) / (maxY - minY || 1);
   const tY = y => H - pad - (y - minY) * scaleY;
 
-  // Vẽ lưới
+  // Vẽ lưới tọa độ
   ctx.strokeStyle = 'rgba(255,255,255,0.05)';
   ctx.beginPath();
   for(let i=0; i<=10; i++) {
@@ -236,7 +187,7 @@ function draw(tabNum) {
   }
   ctx.stroke();
 
-  // Vẽ đường cong f(x)
+  // Vẽ đường cong đồ thị
   ctx.strokeStyle = '#00e5b0'; ctx.lineWidth = 3;
   ctx.beginPath();
   for(let i=0; i<=200; i++){
@@ -246,65 +197,47 @@ function draw(tabNum) {
   }
   ctx.stroke();
 
-  // Tính toán kết quả tùy theo tab
-  if (tabNum === 1) { // Diện tích
-    let s = integrate(fExpr, a, b);
-    document.getElementById('r1s').textContent = s.toFixed(4);
-    // Tô màu diện tích
-    ctx.fillStyle = 'rgba(108,99,255,0.2)';
-    ctx.beginPath(); ctx.moveTo(tX(a), tY(0));
-    for(let i=0; i<=100; i++){
-        let x = a + (i/100)*(b-a);
-        ctx.lineTo(tX(x), tY(evaluateFn(fExpr, x)));
-    }
-    ctx.lineTo(tX(b), tY(0)); ctx.fill();
-  }
+  // Tính toán theo từng loại bài toán
+  const steps = 1000, dx = (b-a)/steps;
+  let result = 0;
 
-  if (tabNum === 2) { // Độ dài cung
-    const dfStr = getDerivativeStr(fExpr);
-    document.getElementById('r2df').textContent = "f'(x) = " + dfStr;
-    let l = 0;
-    const steps = 1000, dx = (b-a)/steps;
-    for(let i=0; i<steps; i++){
+  if(tab === 1) { // Diện tích
+    for(let i=0; i<steps; i++) result += Math.abs(evaluateFn(fExpr, a + i*dx)) * dx;
+    document.getElementById('r1s').textContent = result.toFixed(5);
+  } 
+  else if(tab === 2) { // Độ dài cung
+    const dfExpr = getDerivativeStr(fExpr);
+    document.getElementById('r2df').textContent = "f'(x) = " + dfExpr;
+    for(let i=0; i<steps; i++) {
+      let df = evaluateFn(dfExpr, a + i*dx);
+      result += Math.sqrt(1 + df*df) * dx;
+    }
+    document.getElementById('r2l').textContent = result.toFixed(5);
+  }
+  else if(tab === 3) { // Thể tích Ox
+    for(let i=0; i<steps; i++) {
+      let y = evaluateFn(fExpr, a + i*dx);
+      result += Math.PI * y * y * dx;
+    }
+    document.getElementById('r3v').textContent = result.toFixed(5);
+  }
+  else if(tab === 4) { // Thể tích Oy
+    for(let i=0; i<steps; i++) {
       let x = a + i*dx;
-      let df = math.evaluate(dfStr, {x: x});
-      l += Math.sqrt(1 + df*df) * dx;
-    }
-    document.getElementById('r2l').textContent = l.toFixed(4);
-  }
-
-  if (tabNum === 3) { // Xoay Ox
-    let v = 0;
-    const steps = 1000, dx = (b-a)/steps;
-    for(let i=0; i<steps; i++){
-      let y = evaluateFn(fExpr, a + (i+0.5)*dx);
-      v += Math.PI * y * y * dx;
-    }
-    document.getElementById('r3v').textContent = v.toFixed(4);
-  }
-
-  if (tabNum === 4) { // Xoay Oy
-    let v = 0;
-    const steps = 1000, dx = (b-a)/steps;
-    for(let i=0; i<steps; i++){
-      let x = a + (i+0.5)*dx;
       let y = Math.abs(evaluateFn(fExpr, x));
-      v += 2 * Math.PI * x * y * dx;
+      result += 2 * Math.PI * x * y * dx;
     }
-    document.getElementById('r4v').textContent = v.toFixed(4);
+    document.getElementById('r4v').textContent = result.toFixed(5);
   }
-
-  if (tabNum === 5) { // Diện tích mặt
-    const dfStr = getDerivativeStr(fExpr);
-    let s = 0;
-    const steps = 1000, dx = (b-a)/steps;
-    for(let i=0; i<steps; i++){
-      let x = a + (i+0.5)*dx;
+  else if(tab === 5) { // Diện tích mặt
+    const dfExpr = getDerivativeStr(fExpr);
+    for(let i=0; i<steps; i++) {
+      let x = a + i*dx;
       let y = Math.abs(evaluateFn(fExpr, x));
-      let df = math.evaluate(dfStr, {x: x});
-      s += 2 * Math.PI * y * Math.sqrt(1 + df*df) * dx;
+      let df = evaluateFn(dfExpr, x);
+      result += 2 * Math.PI * y * Math.sqrt(1 + df*df) * dx;
     }
-    document.getElementById('r5s').textContent = s.toFixed(4);
+    document.getElementById('r5s').textContent = result.toFixed(5);
   }
 }
 
@@ -313,18 +246,10 @@ function switchTab(id, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
-  let num = id.replace('t','');
-  draw(num);
+  process(id.replace('t',''));
 }
 
-function exportPNG(id) {
-  const link = document.createElement('a');
-  link.download = 'ket_qua.png';
-  link.href = document.getElementById(id).toDataURL();
-  link.click();
-}
-
-window.onload = () => draw(1);
+window.onload = () => process(1);
 </script>
 </body>
 </html>
