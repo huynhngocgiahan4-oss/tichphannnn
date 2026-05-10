@@ -1,1 +1,1211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Bias Ecosystem Simulator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
 
+  :root {
+    --bg: #0a0c10;
+    --bg2: #111420;
+    --bg3: #181c28;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e2e6f0;
+    --text2: #8892a4;
+    --text3: #4a5568;
+    --accent: #3d7eff;
+    --accent2: #7c5cff;
+    --danger: #ff4d6d;
+    --warn: #ffa94d;
+    --success: #34d399;
+    --info: #60c8ff;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    flex-shrink: 0;
+    gap: 12px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 28px; height: 28px;
+    border: 1.5px solid var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    color: var(--accent);
+    font-family: var(--mono);
+    font-weight: 700;
+  }
+
+  h1 {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .header-stats {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .hstat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+  }
+
+  .hstat-val {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .hstat-label {
+    font-size: 9px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .btn {
+    padding: 6px 14px;
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.04em;
+  }
+  .btn:hover { background: var(--bg3); color: var(--text); border-color: var(--accent); }
+  .btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn.danger { border-color: var(--danger); color: var(--danger); }
+  .btn.danger:hover { background: var(--danger); color: #fff; }
+
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .sim-panel {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border);
+    background: var(--bg);
+    position: relative;
+  }
+
+  #world-canvas {
+    display: block;
+  }
+
+  .right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg2);
+  }
+
+  .controls-section {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-title::before {
+    content: '';
+    width: 3px; height: 3px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  .sliders-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .slider-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .slider-label {
+    font-size: 11px;
+    color: var(--text2);
+    font-weight: 500;
+  }
+
+  .slider-val {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  input[type=range] {
+    width: 100%;
+    height: 4px;
+    -webkit-appearance: none;
+    background: var(--border2);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(61,126,255,0.5);
+  }
+
+  .analytics-section {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 16px;
+  }
+
+  .analytics-section::-webkit-scrollbar { width: 4px; }
+  .analytics-section::-webkit-scrollbar-track { background: transparent; }
+  .analytics-section::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .metric-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+
+  .metric-val {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .metric-val.danger { color: var(--danger); }
+  .metric-val.warn { color: var(--warn); }
+  .metric-val.success { color: var(--success); }
+  .metric-val.info { color: var(--info); }
+  .metric-val.accent { color: var(--accent); }
+
+  .metric-label {
+    font-size: 9px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+  }
+
+  .chart-wrap {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .chart-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  canvas.chart { max-height: 110px; }
+
+  .event-log {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .log-header {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .log-entries {
+    height: 100px;
+    overflow-y: auto;
+    padding: 6px 0;
+  }
+  .log-entries::-webkit-scrollbar { width: 3px; }
+  .log-entries::-webkit-scrollbar-thumb { background: var(--border2); }
+
+  .log-entry {
+    padding: 3px 12px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+  }
+  .log-entry .tick { color: var(--text3); min-width: 32px; }
+  .log-entry.ev-bias { color: var(--warn); }
+  .log-entry.ev-coop { color: var(--success); }
+  .log-entry.ev-death { color: var(--danger); }
+  .log-entry.ev-born { color: var(--info); }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: var(--text2);
+  }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  .bias-meter {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .bias-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  .inequality-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .ineq-label {
+    font-size: 10px;
+    color: var(--text3);
+    min-width: 52px;
+    font-family: var(--mono);
+  }
+  .ineq-bar-wrap {
+    flex: 1;
+    height: 12px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    display: flex;
+  }
+
+  .tooltip-box {
+    position: absolute;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text);
+    pointer-events: none;
+    z-index: 100;
+    display: none;
+    min-width: 130px;
+    line-height: 1.8;
+  }
+
+  .speed-btns {
+    display: flex;
+    gap: 4px;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 600;
+    font-family: var(--mono);
+    text-transform: uppercase;
+  }
+  .tag-warn { background: rgba(255,169,77,0.15); color: var(--warn); }
+  .tag-danger { background: rgba(255,77,109,0.15); color: var(--danger); }
+  .tag-ok { background: rgba(52,211,153,0.15); color: var(--success); }
+
+  .two-charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">AI</div>
+    <h1>Bias Ecosystem Simulator</h1>
+  </div>
+  <div class="header-stats">
+    <div class="hstat"><span class="hstat-val" id="h-tick">0</span><span class="hstat-label">Tick</span></div>
+    <div class="hstat"><span class="hstat-val" id="h-alive">0</span><span class="hstat-label">Alive</span></div>
+    <div class="hstat"><span class="hstat-val" id="h-bias" style="color:var(--warn)">0%</span><span class="hstat-label">Bias</span></div>
+    <div class="hstat"><span class="hstat-val" id="h-coop" style="color:var(--success)">0%</span><span class="hstat-label">Coop</span></div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <div class="speed-btns">
+      <button class="btn" id="btn-slow" onclick="setSpeed(1)">1x</button>
+      <button class="btn active" id="btn-norm" onclick="setSpeed(3)">3x</button>
+      <button class="btn" id="btn-fast" onclick="setSpeed(8)">8x</button>
+    </div>
+    <button class="btn" id="btn-pause" onclick="togglePause()">⏸ Pause</button>
+    <button class="btn danger" onclick="resetSim()">↺ Reset</button>
+  </div>
+</header>
+
+<div class="main">
+  <div class="sim-panel" id="sim-panel">
+    <canvas id="world-canvas"></canvas>
+    <div class="tooltip-box" id="tooltip"></div>
+  </div>
+
+  <div class="right-panel">
+    <div class="controls-section">
+      <div class="section-title">God Controls — Môi trường</div>
+      <div class="sliders-grid">
+        <div class="slider-row">
+          <div class="slider-header">
+            <span class="slider-label">🌩 Thời tiết khắc nghiệt</span>
+            <span class="slider-val" id="val-weather">30%</span>
+          </div>
+          <input type="range" id="sl-weather" min="0" max="100" value="30" oninput="updateSlider('weather',this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-header">
+            <span class="slider-label">🌾 Khan hiếm thức ăn</span>
+            <span class="slider-val" id="val-scarcity">40%</span>
+          </div>
+          <input type="range" id="sl-scarcity" min="0" max="100" value="40" oninput="updateSlider('scarcity',this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-header">
+            <span class="slider-label">🐻 Tần suất thú dữ</span>
+            <span class="slider-val" id="val-predator">25%</span>
+          </div>
+          <input type="range" id="sl-predator" min="0" max="100" value="25" oninput="updateSlider('predator',this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-header">
+            <span class="slider-label">🤖 Số lượng AI</span>
+            <span class="slider-val" id="val-npcs">20</span>
+          </div>
+          <input type="range" id="sl-npcs" min="5" max="40" value="20" oninput="updateSlider('npcs',this.value)">
+        </div>
+      </div>
+    </div>
+
+    <div class="analytics-section">
+      <div class="section-title">Phân tích Bias — Thời gian thực</div>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-val success" id="m-coop">0%</div>
+          <div class="metric-label">Hợp tác<br>Cooperation</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val warn" id="m-bias">0%</div>
+          <div class="metric-label">Định kiến<br>Bias Index</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val danger" id="m-gini">0.00</div>
+          <div class="metric-label">Bất bình đẳng<br>Gini Coeff.</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val accent" id="m-memory">0</div>
+          <div class="metric-label">Ký ức tiêu cực<br>Neg. Memories</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val info" id="m-food">0</div>
+          <div class="metric-label">Thức ăn còn<br>Food Remain</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val danger" id="m-dead">0</div>
+          <div class="metric-label">Đã chết<br>Total Deaths</div>
+        </div>
+      </div>
+
+      <div class="two-charts">
+        <div class="chart-wrap">
+          <div class="chart-title">Cooperation vs Bias (%)</div>
+          <canvas class="chart" id="chart-coop"></canvas>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-title">Năng lượng trung bình theo nhóm</div>
+          <canvas class="chart" id="chart-energy"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-wrap" style="margin-bottom:10px">
+        <div class="chart-title">Phân hóa năng lượng — Giàu / Nghèo</div>
+        <div id="ineq-bars" style="margin-top:4px"></div>
+      </div>
+
+      <div class="chart-wrap" style="margin-bottom:10px">
+        <div class="chart-title">Bias vùng lãnh thổ — Zone Avoidance</div>
+        <canvas class="chart" id="chart-zone"></canvas>
+      </div>
+
+      <div class="event-log">
+        <div class="log-header">⚡ Event Log</div>
+        <div class="log-entries" id="log-entries"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const COLORS = ['#3d7eff','#ff4d6d','#34d399','#ffa94d','#a78bfa','#60c8ff','#fb923c','#4ade80'];
+const GROUP_NAMES = ['Alpha','Beta','Gamma','Delta','Epsilon','Zeta','Eta','Theta'];
+
+let W = 0, H = 0;
+const canvas = document.getElementById('world-canvas');
+const ctx = canvas.getContext('2d');
+const panel = document.getElementById('sim-panel');
+
+function resizeCanvas() {
+  const headerH = document.querySelector('header').offsetHeight;
+  H = window.innerHeight - headerH;
+  W = Math.min(Math.floor(H * 1.1), window.innerWidth * 0.52);
+  canvas.width = W;
+  canvas.height = H;
+  panel.style.width = W + 'px';
+}
+resizeCanvas();
+window.addEventListener('resize', () => { resizeCanvas(); });
+
+// ---- Simulation State ----
+let tick = 0;
+let paused = false;
+let simSpeed = 3;
+let totalDeaths = 0;
+
+const ENV = {
+  weather: 30,
+  scarcity: 40,
+  predator: 25,
+  npcs: 20,
+};
+
+const ZONES = 4;
+let zoneData = [];
+
+let food = [];
+let predators = [];
+let agents = [];
+let history = { coop: [], bias: [], byGroup: {}, ticks: [] };
+let coopEvents = 0, totalDecisions = 0;
+let logEntries = [];
+
+// Zone definitions (quadrants)
+function getZone(x, y) {
+  const zx = x < W/2 ? 0 : 1;
+  const zy = y < H/2 ? 0 : 1;
+  return zy * 2 + zx;
+}
+
+function zoneCenter(z) {
+  const col = z % 2, row = Math.floor(z / 2);
+  return { x: col * W/2 + W/4, y: row * H/2 + H/4 };
+}
+
+// ---- Food ----
+function spawnFood() {
+  const maxFood = Math.floor(60 - ENV.scarcity * 0.5);
+  while (food.length < maxFood) {
+    // Food clusters — bias toward certain zones
+    let zone = Math.random() < 0.6 ? (Math.random() < 0.5 ? 0 : 3) : Math.floor(Math.random() * 4);
+    const zc = zoneCenter(zone);
+    food.push({
+      x: Math.max(10, Math.min(W-10, zc.x + (Math.random()-0.5)*W*0.35)),
+      y: Math.max(10, Math.min(H-10, zc.y + (Math.random()-0.5)*H*0.35)),
+      energy: 20 + Math.random() * 30,
+      age: 0,
+    });
+  }
+}
+
+// ---- Predators ----
+function spawnPredator() {
+  const edge = Math.floor(Math.random()*4);
+  let px, py;
+  if (edge === 0) { px = Math.random()*W; py = 0; }
+  else if (edge === 1) { px = W; py = Math.random()*H; }
+  else if (edge === 2) { px = Math.random()*W; py = H; }
+  else { px = 0; py = Math.random()*H; }
+  predators.push({ x: px, y: py, vx: (Math.random()-0.5)*2, vy: (Math.random()-0.5)*2, hp: 100, age: 0 });
+}
+
+// ---- Agent ----
+function createAgent(id, x, y) {
+  const group = id % COLORS.length;
+  return {
+    id, group,
+    x: x || 20 + Math.random() * (W-40),
+    y: y || 20 + Math.random() * (H-40),
+    vx: 0, vy: 0,
+    energy: 60 + Math.random() * 40,
+    health: 100,
+    memories: [],
+    zoneBias: [0, 0, 0, 0],
+    groupBias: new Array(COLORS.length).fill(0),
+    age: 0,
+    state: 'wander',
+    target: null,
+    shareTimer: 0,
+    alive: true,
+    sharedRecently: false,
+    flashTimer: 0,
+    flashColor: null,
+  };
+}
+
+function initSim() {
+  tick = 0; totalDeaths = 0; coopEvents = 0; totalDecisions = 0;
+  food = []; predators = []; agents = [];
+  logEntries = [];
+  history = { coop: [], bias: [], ticks: [] };
+  zoneData = Array(ZONES).fill(null).map((_,i) => ({ zone: i, avoidCount: 0, visits: 0 }));
+  for (let i = 0; i < ENV.npcs; i++) agents.push(createAgent(i));
+  spawnFood();
+  updateLog('born', 0, `Mô phỏng bắt đầu với ${ENV.npcs} agents`);
+}
+
+// ---- Decision Logic ----
+function agentDecide(a) {
+  if (!a.alive) return;
+
+  const weatherPenalty = ENV.weather / 100;
+  const speed = (1.8 - weatherPenalty * 1.0) * (a.energy > 30 ? 1 : 0.6);
+
+  // Check current zone bias
+  const myZone = getZone(a.x, a.y);
+  if (a.zoneBias[myZone] > 2 && Math.random() < 0.04) {
+    // Flee from biased zone
+    const safeZone = a.zoneBias.indexOf(Math.min(...a.zoneBias));
+    const sc = zoneCenter(safeZone);
+    a.vx += (sc.x - a.x) * 0.01;
+    a.vy += (sc.y - a.y) * 0.01;
+    totalDecisions++;
+  }
+
+  // Flee predators
+  let nearPred = null, nearPredDist = Infinity;
+  for (const p of predators) {
+    const d = dist(a, p);
+    if (d < nearPredDist) { nearPredDist = d; nearPred = p; }
+  }
+  if (nearPred && nearPredDist < 90) {
+    const dx = a.x - nearPred.x, dy = a.y - nearPred.y;
+    const len = Math.sqrt(dx*dx+dy*dy) || 1;
+    a.vx += dx/len * 3;
+    a.vy += dy/len * 3;
+    a.state = 'flee';
+    return;
+  }
+
+  // Seek food
+  let nearFood = null, nearFoodDist = Infinity;
+  for (const f of food) {
+    const d = dist(a, f);
+    if (d < nearFoodDist) { nearFoodDist = d; nearFood = f; }
+  }
+
+  if (nearFood && nearFoodDist < 160 && a.energy < 80) {
+    const fz = getZone(nearFood.x, nearFood.y);
+    if (a.zoneBias[fz] < 3) {
+      const dx = nearFood.x - a.x, dy = nearFood.y - a.y;
+      const len = Math.sqrt(dx*dx+dy*dy) || 1;
+      a.vx += dx/len * speed;
+      a.vy += dy/len * speed;
+      a.state = 'hunt';
+      zoneData[fz].visits++;
+    } else {
+      // Zone is biased — avoid it
+      zoneData[fz].avoidCount++;
+      a.state = 'wander';
+    }
+    return;
+  }
+
+  // Cooperate or compete with nearby agents
+  let nearAgent = null, nearAgentDist = Infinity;
+  for (const b of agents) {
+    if (b.id === a.id || !b.alive) continue;
+    const d = dist(a, b);
+    if (d < nearAgentDist) { nearAgentDist = d; nearAgent = b; }
+  }
+
+  if (nearAgent && nearAgentDist < 60) {
+    totalDecisions++;
+    const biasToward = a.groupBias[nearAgent.group];
+    const isEnvHarsh = (ENV.scarcity + ENV.weather) / 2 > 60;
+    const shouldCooperate = biasToward < 1 && (nearAgent.group === a.group || a.energy > 50 || isEnvHarsh);
+
+    if (shouldCooperate && a.energy > 30 && nearAgent.energy < 40 && a.shareTimer <= 0) {
+      a.energy -= 10; nearAgent.energy += 8;
+      a.shareTimer = 30;
+      coopEvents++;
+      a.sharedRecently = true;
+      a.flashTimer = 15; a.flashColor = '#34d399';
+      nearAgent.flashTimer = 15; nearAgent.flashColor = '#34d399';
+      // Update group bias positively
+      a.groupBias[nearAgent.group] = Math.max(-2, a.groupBias[nearAgent.group] - 0.3);
+      if (Math.random() < 0.05) updateLog('coop', tick, `NPC#${a.id}(${GROUP_NAMES[a.group]}) chia sẻ với NPC#${nearAgent.id}`);
+    } else if (biasToward > 2 && a.energy < 40) {
+      // Compete — steal
+      const stolen = Math.min(5, nearAgent.energy * 0.05);
+      a.energy += stolen; nearAgent.energy -= stolen;
+      a.groupBias[nearAgent.group] = Math.min(5, a.groupBias[nearAgent.group] + 0.5);
+      nearAgent.groupBias[a.group] = Math.min(5, nearAgent.groupBias[a.group] + 0.3);
+      a.flashTimer = 10; a.flashColor = '#ff4d6d';
+      if (Math.random() < 0.03) updateLog('bias', tick, `NPC#${a.id} tranh giành với NPC#${nearAgent.id}(${GROUP_NAMES[nearAgent.group]})`);
+    }
+  }
+
+  // Wander
+  a.state = 'wander';
+  a.vx += (Math.random()-0.5) * 0.8;
+  a.vy += (Math.random()-0.5) * 0.8;
+}
+
+function agentUpdate(a) {
+  if (!a.alive) return;
+  a.shareTimer = Math.max(0, a.shareTimer - 1);
+  a.flashTimer = Math.max(0, a.flashTimer - 1);
+  a.sharedRecently = false;
+  a.age++;
+
+  const drag = 0.88;
+  a.vx *= drag; a.vy *= drag;
+  const spd = Math.sqrt(a.vx*a.vx + a.vy*a.vy);
+  const maxSpd = 2.5;
+  if (spd > maxSpd) { a.vx = a.vx/spd*maxSpd; a.vy = a.vy/spd*maxSpd; }
+
+  a.x += a.vx; a.y += a.vy;
+  a.x = Math.max(8, Math.min(W-8, a.x));
+  a.y = Math.max(8, Math.min(H-8, a.y));
+
+  // Eat food
+  for (let i = food.length-1; i >= 0; i--) {
+    const f = food[i];
+    if (dist(a, f) < 12) {
+      a.energy = Math.min(120, a.energy + f.energy * 0.5);
+      const fz = getZone(f.x, f.y);
+      a.zoneBias[fz] = Math.max(-2, a.zoneBias[fz] - 0.5);
+      food.splice(i, 1);
+      a.flashTimer = 8; a.flashColor = '#ffa94d';
+      break;
+    }
+  }
+
+  // Predator damage
+  for (const p of predators) {
+    if (dist(a, p) < 20) {
+      a.health -= 8;
+      a.energy -= 5;
+      const pz = getZone(p.x, p.y);
+      a.zoneBias[pz] = Math.min(5, a.zoneBias[pz] + 1.5);
+      a.memories.push({ type: 'predator', zone: pz, tick });
+      if (a.memories.length > 20) a.memories.shift();
+      a.flashTimer = 12; a.flashColor = '#ff4d6d';
+      if (Math.random() < 0.04) updateLog('bias', tick, `NPC#${a.id} bị tấn công tại Zone ${pz} — ghi nhớ định kiến`);
+    }
+  }
+
+  // Energy drain
+  const weatherDrain = 0.08 + ENV.weather * 0.002;
+  a.energy -= weatherDrain;
+  if (a.energy > 100 && a.age % 60 === 0) {
+    // Reproduce (spawn new agent)
+    if (agents.length < 50) {
+      const child = createAgent(agents.length, a.x + (Math.random()-0.5)*30, a.y + (Math.random()-0.5)*30);
+      child.group = a.group;
+      child.zoneBias = [...a.zoneBias].map(v => v * 0.5);
+      child.groupBias = [...a.groupBias].map(v => v * 0.5);
+      agents.push(child);
+      updateLog('born', tick, `NPC#${child.id}(${GROUP_NAMES[child.group]}) sinh ra từ NPC#${a.id}`);
+    }
+    a.energy = 70;
+  }
+
+  if (a.health <= 0 || a.energy <= 0) {
+    a.alive = false;
+    totalDeaths++;
+    // Update zone bias for group members
+    const deathZone = getZone(a.x, a.y);
+    for (const b of agents) {
+      if (b.alive && b.group === a.group) {
+        b.zoneBias[deathZone] = Math.min(5, b.zoneBias[deathZone] + 0.8);
+      }
+    }
+    updateLog('death', tick, `NPC#${a.id}(${GROUP_NAMES[a.group]}) chết tại Zone ${deathZone}`);
+  }
+}
+
+function predatorUpdate(p) {
+  p.age++;
+  // Hunt nearest agent
+  let target = null, td = Infinity;
+  for (const a of agents) {
+    if (!a.alive) continue;
+    const d = dist(a, p);
+    if (d < td) { td = d; target = a; }
+  }
+  if (target && td < 200) {
+    p.vx += (target.x - p.x) * 0.015;
+    p.vy += (target.y - p.y) * 0.015;
+  } else {
+    p.vx += (Math.random()-0.5) * 0.5;
+    p.vy += (Math.random()-0.5) * 0.5;
+  }
+  p.vx *= 0.9; p.vy *= 0.9;
+  const spd = Math.sqrt(p.vx*p.vx+p.vy*p.vy);
+  const maxSpd = 1.8;
+  if (spd > maxSpd) { p.vx = p.vx/spd*maxSpd; p.vy = p.vy/spd*maxSpd; }
+  p.x += p.vx; p.y += p.vy;
+  p.x = Math.max(0, Math.min(W, p.x));
+  p.y = Math.max(0, Math.min(H, p.y));
+  if (p.age > 400 + Math.random()*200) return false;
+  return true;
+}
+
+function dist(a, b) {
+  return Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2);
+}
+
+// ---- Draw ----
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  // Background with zone coloring
+  ctx.fillStyle = '#08090f';
+  ctx.fillRect(0, 0, W, H);
+
+  // Zone overlays with bias intensity
+  const zColors = ['rgba(61,126,255,', 'rgba(255,77,109,', 'rgba(52,211,153,', 'rgba(255,169,77,'];
+  for (let z = 0; z < 4; z++) {
+    const col = z % 2, row = Math.floor(z/2);
+    const totalBias = agents.reduce((s, a) => s + (a.alive ? Math.max(0, a.zoneBias[z]) : 0), 0);
+    const biasIntensity = Math.min(0.12, totalBias * 0.002);
+    ctx.fillStyle = zColors[z] + biasIntensity + ')';
+    ctx.fillRect(col * W/2, row * H/2, W/2, H/2);
+  }
+
+  // Zone borders
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, H/2); ctx.lineTo(W, H/2); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Zone labels
+  ctx.font = '10px Space Mono';
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.textAlign = 'left';
+  ctx.fillText('ZONE 0', 6, 14);
+  ctx.fillText('ZONE 1', W/2+6, 14);
+  ctx.fillText('ZONE 2', 6, H/2+14);
+  ctx.fillText('ZONE 3', W/2+6, H/2+14);
+
+  // Food
+  for (const f of food) {
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, 3, 0, Math.PI*2);
+    ctx.fillStyle = '#ffa94d';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, 5, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(255,169,77,0.3)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // Predators
+  for (const p of predators) {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.fillStyle = '#ff4d6d';
+    ctx.beginPath();
+    ctx.moveTo(0, -9); ctx.lineTo(7, 6); ctx.lineTo(-7, 6);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,77,109,0.5)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Cooperation lines
+  for (const a of agents) {
+    if (!a.alive) continue;
+    for (const b of agents) {
+      if (!b.alive || b.id <= a.id) continue;
+      const d = dist(a, b);
+      if (d < 50 && a.groupBias[b.group] < 0) {
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+        const alpha = Math.min(0.4, Math.abs(a.groupBias[b.group]) * 0.15);
+        ctx.strokeStyle = `rgba(52,211,153,${alpha})`;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Agents
+  for (const a of agents) {
+    if (!a.alive) continue;
+    const r = 6 + Math.min(4, a.energy / 25);
+    const col = COLORS[a.group % COLORS.length];
+
+    // Bias aura
+    const totalPosBias = a.groupBias.reduce((s, v) => s + Math.max(0, v), 0);
+    if (totalPosBias > 3) {
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, r + 6, 0, Math.PI*2);
+      ctx.strokeStyle = `rgba(255,169,77,${Math.min(0.5, totalPosBias*0.08)})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    // Flash
+    if (a.flashTimer > 0) {
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, r+8, 0, Math.PI*2);
+      ctx.strokeStyle = a.flashColor + Math.round(a.flashTimer/15 * 255).toString(16).padStart(2,'0');
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // Main body
+    ctx.beginPath();
+    ctx.arc(a.x, a.y, r, 0, Math.PI*2);
+    ctx.fillStyle = col;
+    ctx.fill();
+
+    // Health bar
+    const hpFrac = a.health / 100;
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(a.x - r, a.y - r - 5, r*2, 2);
+    ctx.fillStyle = hpFrac > 0.5 ? '#34d399' : hpFrac > 0.25 ? '#ffa94d' : '#ff4d6d';
+    ctx.fillRect(a.x - r, a.y - r - 5, r*2*hpFrac, 2);
+
+    // ID label
+    ctx.font = '7px Space Mono';
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.textAlign = 'center';
+    ctx.fillText(a.id, a.x, a.y + 2.5);
+
+    // State indicator
+    if (a.state === 'flee') {
+      ctx.font = '8px sans-serif';
+      ctx.fillText('⚡', a.x + r + 2, a.y - r);
+    }
+  }
+}
+
+// ---- Charts ----
+const chartDefaults = {
+  responsive: true,
+  maintainAspectRatio: false,
+  animation: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { display: false },
+    y: { display: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#4a5568', font: { size: 9, family: 'Space Mono' } } }
+  }
+};
+
+const coopChart = new Chart(document.getElementById('chart-coop'), {
+  type: 'line',
+  data: {
+    labels: [],
+    datasets: [
+      { label: 'Cooperation', data: [], borderColor: '#34d399', borderWidth: 1.5, fill: false, tension: 0.3, pointRadius: 0 },
+      { label: 'Bias', data: [], borderColor: '#ffa94d', borderWidth: 1.5, fill: false, tension: 0.3, pointRadius: 0 },
+    ]
+  },
+  options: { ...chartDefaults, scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, min: 0, max: 100 } } }
+});
+
+const energyChart = new Chart(document.getElementById('chart-energy'), {
+  type: 'bar',
+  data: { labels: GROUP_NAMES.slice(0, COLORS.length), datasets: [{ data: new Array(COLORS.length).fill(0), backgroundColor: COLORS.map(c => c + 'cc'), borderWidth: 0, borderRadius: 3 }] },
+  options: { ...chartDefaults, indexAxis: 'y', scales: { x: { display: false }, y: { display: true, ticks: { color: '#4a5568', font: { size: 8, family: 'Space Mono' } }, grid: { display: false } } } }
+});
+
+const zoneChart = new Chart(document.getElementById('chart-zone'), {
+  type: 'bar',
+  data: {
+    labels: ['Zone 0', 'Zone 1', 'Zone 2', 'Zone 3'],
+    datasets: [
+      { label: 'Avoid', data: [0,0,0,0], backgroundColor: 'rgba(255,77,109,0.7)', borderRadius: 3, borderWidth: 0 },
+      { label: 'Visit', data: [0,0,0,0], backgroundColor: 'rgba(61,126,255,0.5)', borderRadius: 3, borderWidth: 0 },
+    ]
+  },
+  options: { ...chartDefaults, plugins: { legend: { display: true, labels: { color: '#4a5568', font: { size: 9, family: 'Space Mono' }, boxWidth: 10 } } } }
+});
+
+// ---- Analytics Update ----
+let histLen = 80;
+function updateAnalytics() {
+  const alive = agents.filter(a => a.alive);
+  const totalBias = alive.reduce((s, a) => s + a.groupBias.reduce((x, v) => x + Math.max(0, v), 0), 0);
+  const maxBias = alive.length * COLORS.length * 5;
+  const biasIdx = maxBias > 0 ? Math.round(totalBias / maxBias * 100) : 0;
+
+  const coopRate = totalDecisions > 0 ? Math.round(coopEvents / (totalDecisions + coopEvents) * 100) : 0;
+
+  const energies = alive.map(a => a.energy).sort((a,b) => a-b);
+  let gini = 0;
+  if (energies.length > 1) {
+    let sum = 0, n = energies.length;
+    const mean = energies.reduce((s,v)=>s+v,0)/n;
+    for (let i=0;i<n;i++) for (let j=0;j<n;j++) sum += Math.abs(energies[i]-energies[j]);
+    gini = sum / (2 * n * n * mean);
+  }
+
+  const negMemories = alive.reduce((s,a) => s + a.memories.length, 0);
+
+  document.getElementById('m-coop').textContent = coopRate + '%';
+  document.getElementById('m-bias').textContent = biasIdx + '%';
+  document.getElementById('m-gini').textContent = gini.toFixed(2);
+  document.getElementById('m-memory').textContent = negMemories;
+  document.getElementById('m-food').textContent = food.length;
+  document.getElementById('m-dead').textContent = totalDeaths;
+
+  document.getElementById('h-tick').textContent = tick;
+  document.getElementById('h-alive').textContent = alive.length;
+  document.getElementById('h-bias').textContent = biasIdx + '%';
+  document.getElementById('h-coop').textContent = coopRate + '%';
+
+  // History
+  history.coop.push(coopRate);
+  history.bias.push(biasIdx);
+  history.ticks.push(tick);
+  if (history.coop.length > histLen) { history.coop.shift(); history.bias.shift(); history.ticks.shift(); }
+
+  coopChart.data.labels = history.ticks;
+  coopChart.data.datasets[0].data = history.coop;
+  coopChart.data.datasets[1].data = history.bias;
+  coopChart.update();
+
+  // Energy by group
+  const groupEnergy = new Array(COLORS.length).fill(0);
+  const groupCount = new Array(COLORS.length).fill(0);
+  for (const a of alive) { groupEnergy[a.group] += a.energy; groupCount[a.group]++; }
+  energyChart.data.datasets[0].data = groupEnergy.map((v,i) => groupCount[i] > 0 ? Math.round(v/groupCount[i]) : 0);
+  energyChart.update();
+
+  // Zone chart
+  zoneChart.data.datasets[0].data = zoneData.map(z => z.avoidCount);
+  zoneChart.data.datasets[1].data = zoneData.map(z => z.visits);
+  zoneChart.update();
+
+  // Inequality bars
+  const ineqDiv = document.getElementById('ineq-bars');
+  ineqDiv.innerHTML = '';
+  const sortedGroups = groupEnergy.map((v,i) => ({ i, avg: groupCount[i] > 0 ? v/groupCount[i] : 0 })).sort((a,b) => b.avg-a.avg);
+  const maxAvg = Math.max(1, sortedGroups[0].avg);
+  for (const { i, avg } of sortedGroups) {
+    if (groupCount[i] === 0) continue;
+    const pct = Math.round(avg / maxAvg * 100);
+    ineqDiv.innerHTML += `<div class="inequality-bar">
+      <span class="ineq-label" style="color:${COLORS[i]}">${GROUP_NAMES[i]}</span>
+      <div class="ineq-bar-wrap"><div style="width:${pct}%;background:${COLORS[i]}55;border-right:2px solid ${COLORS[i]};transition:width 0.4s"></div></div>
+      <span style="font-size:9px;font-family:var(--mono);color:var(--text3);min-width:28px">${Math.round(avg)}</span>
+    </div>`;
+  }
+}
+
+// ---- Event Log ----
+function updateLog(type, tick, msg) {
+  const cls = type === 'coop' ? 'ev-coop' : type === 'bias' ? 'ev-bias' : type === 'death' ? 'ev-death' : 'ev-born';
+  logEntries.unshift({ cls, tick, msg });
+  if (logEntries.length > 40) logEntries.pop();
+  const container = document.getElementById('log-entries');
+  container.innerHTML = logEntries.map(e => `<div class="log-entry ${e.cls}"><span class="tick">T${e.tick}</span><span>${e.msg}</span></div>`).join('');
+}
+
+// ---- Main Loop ----
+let lastTime = 0;
+let frameCount = 0;
+function loop(ts) {
+  if (!paused) {
+    for (let s = 0; s < simSpeed; s++) {
+      tick++;
+
+      // Spawn predators
+      if (Math.random() < ENV.predator / 100 * 0.04) spawnPredator();
+      predators = predators.filter(p => predatorUpdate(p));
+
+      // Spawn food
+      if (tick % 15 === 0) spawnFood();
+
+      // Agents
+      for (const a of agents) agentDecide(a);
+      for (const a of agents) agentUpdate(a);
+
+      // Remove dead (keep for visuals briefly)
+      if (tick % 30 === 0) agents = agents.filter(a => a.alive);
+    }
+
+    frameCount++;
+    if (frameCount % 5 === 0) updateAnalytics();
+  }
+
+  draw();
+  requestAnimationFrame(loop);
+}
+
+// ---- Controls ----
+function updateSlider(key, val) {
+  val = parseInt(val);
+  ENV[key] = val;
+  const display = key === 'npcs' ? val : val + '%';
+  document.getElementById('val-' + key).textContent = display;
+}
+
+function togglePause() {
+  paused = !paused;
+  document.getElementById('btn-pause').textContent = paused ? '▶ Resume' : '⏸ Pause';
+  document.getElementById('btn-pause').classList.toggle('active', paused);
+}
+
+function setSpeed(s) {
+  simSpeed = s;
+  ['btn-slow','btn-norm','btn-fast'].forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById(s === 1 ? 'btn-slow' : s === 3 ? 'btn-norm' : 'btn-fast').classList.add('active');
+}
+
+function resetSim() {
+  ENV.npcs = parseInt(document.getElementById('sl-npcs').value);
+  initSim();
+  coopEvents = 0; totalDecisions = 0;
+}
+
+// ---- Tooltip ----
+canvas.addEventListener('mousemove', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  const tip = document.getElementById('tooltip');
+  let found = null;
+  for (const a of agents) {
+    if (!a.alive) continue;
+    if (dist({x:mx,y:my}, a) < 10) { found = a; break; }
+  }
+  if (found) {
+    const totalBias = found.groupBias.reduce((s,v) => s+Math.max(0,v), 0);
+    const zoneBiasStr = found.zoneBias.map((v,i) => `Z${i}:${v.toFixed(1)}`).join(' ');
+    tip.style.display = 'block';
+    tip.style.left = (mx + 14) + 'px';
+    tip.style.top = (my - 10) + 'px';
+    tip.innerHTML = `<b style="color:${COLORS[found.group]}">#${found.id} ${GROUP_NAMES[found.group]}</b><br>
+      ⚡ Energy: ${Math.round(found.energy)}<br>
+      ❤ Health: ${Math.round(found.health)}<br>
+      🧠 Memories: ${found.memories.length}<br>
+      😠 Group Bias: ${totalBias.toFixed(1)}<br>
+      🗺 Zone Bias: ${zoneBiasStr}<br>
+      📊 State: ${found.state}`;
+  } else {
+    tip.style.display = 'none';
+  }
+});
+canvas.addEventListener('mouseleave', () => { document.getElementById('tooltip').style.display = 'none'; });
+
+// ---- Init ----
+initSim();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
