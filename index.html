@@ -69,6 +69,8 @@ h1{font-family:'DM Serif Display',serif;font-size:clamp(30px,6vw,56px);line-heig
 #pm3h{position:absolute;top:10px;left:12px;font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:2px;text-transform:uppercase;pointer-events:none;z-index:2}
 .sp{display:none}
 .sp.active{display:block}
+.sp8{display:none}
+.sp8.active{display:block}
 .howto{margin-top:44px;border-top:1px solid var(--border);padding-top:32px}
 .howto h2{font-family:'DM Serif Display',serif;font-size:24px;margin-bottom:18px}
 .stps{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
@@ -98,6 +100,7 @@ footer a{color:var(--accent);text-decoration:none}
   <button class="tab" onclick="switchTab('t5',this)">📏 Độ dài cung</button>
   <button class="tab" onclick="switchTab('t6',this)">🌐 Diện tích xoay</button>
   <button class="tab" onclick="switchTab('t7',this)">🎯 Tham số &amp; Cực</button>
+  <button class="tab" onclick="switchTab('t8',this)">🌍 Mặt cầu cắt</button>
 </div>
 
 <!-- T1 -->
@@ -287,6 +290,85 @@ footer a{color:var(--accent);text-decoration:none}
     <div class="rcs">
       <div class="rc hi"><div class="rl">Diện tích A</div><div class="rv" id="r7ra">—</div><div class="ru">đvdt²</div></div>
       <div class="rc"><div class="rl">R max</div><div class="rv" id="r7rm">—</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- T8: MẶT CẦU CẮT -->
+<div id="t8" class="panel">
+  <div class="tabs" style="margin-bottom:14px">
+    <button class="tab active" onclick="switchSub8('s8plane',this)" style="flex:none;min-width:130px">✂️ Cắt Mặt phẳng</button>
+    <button class="tab" onclick="switchSub8('s8line',this)" style="flex:none;min-width:130px">📍 Cắt Đường thẳng</button>
+  </div>
+
+  <!-- SUB: CẮT MẶT PHẲNG -->
+  <div id="s8plane" class="sp8 active">
+    <div class="fb" id="fb8p">
+      Mặt cầu: <span>x²+y²+z² = R²</span> &nbsp;·&nbsp; Mặt phẳng: <span>z = d</span><br>
+      Nếu |d| &lt; R → thiết diện là đường tròn bán kính <span>r = √(R²−d²)</span>
+    </div>
+    <div class="ig" style="margin-bottom:18px">
+      <div class="field"><label>Bán kính R</label><input id="s8R" type="number" value="5" step="0.5" min="0.5" max="20" oninput="syncSlider8plane()"></div>
+      <div class="field"><label>Khoảng cách d</label><input id="s8d" type="number" value="2" step="0.5" min="-20" max="20" oninput="syncSlider8plane()"></div>
+    </div>
+    <div class="sr">
+      <label>R (bán kính)</label>
+      <input type="range" id="sl8R" min="1" max="10" step="0.1" value="5" oninput="document.getElementById('s8R').value=this.value;draw8plane()">
+      <span class="sv" id="sv8R">5.0</span>
+    </div>
+    <div class="sr">
+      <label>d (khoảng cách)</label>
+      <input type="range" id="sl8d" min="-10" max="10" step="0.1" value="2" oninput="document.getElementById('s8d').value=this.value;draw8plane()">
+      <span class="sv" id="sv8d">2.0</span>
+    </div>
+    <div style="margin-bottom:16px">
+      <div id="s8status" style="font-family:'DM Mono',monospace;font-size:13px;padding:10px 14px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--a2)">
+        Nhập R và d rồi kéo thanh trượt…
+      </div>
+    </div>
+    <div id="plot8plane" style="width:100%;height:520px;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);background:var(--surface);margin-bottom:16px;position:relative">
+      <span style="position:absolute;top:10px;left:12px;font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:2px;text-transform:uppercase;pointer-events:none;z-index:2">Kéo để xoay · Scroll để zoom</span>
+    </div>
+    <div class="rcs">
+      <div class="rc hi"><div class="rl">Bán kính r</div><div class="rv" id="r8r">—</div><div class="ru">đv dài</div></div>
+      <div class="rc"><div class="rl">Diện tích thiết diện</div><div class="rv" id="r8a">—</div><div class="ru">đvdt²</div></div>
+      <div class="rc"><div class="rl">Chu vi thiết diện</div><div class="rv" id="r8c">—</div><div class="ru">đv dài</div></div>
+      <div class="rc"><div class="rl">Trạng thái</div><div class="rv" id="r8st" style="font-size:13px">—</div></div>
+    </div>
+  </div>
+
+  <!-- SUB: CẮT ĐƯỜNG THẲNG -->
+  <div id="s8line" class="sp8" style="display:none">
+    <div class="fb">
+      Mặt cầu: <span>x²+y²+z² = R²</span> &nbsp;·&nbsp; Đường thẳng qua gốc O, cách tâm <span>d</span><br>
+      Nếu d = 0 → cắt qua tâm (dây cung = 2R) · Nếu d &lt; R → dây cung = <span>2√(R²−d²)</span>
+    </div>
+    <div class="ig" style="margin-bottom:18px">
+      <div class="field"><label>Bán kính R</label><input id="s8Rl" type="number" value="5" step="0.5" min="0.5" max="20" oninput="syncSlider8line()"></div>
+      <div class="field"><label>Khoảng cách d</label><input id="s8dl" type="number" value="2" step="0.1" min="0" max="20" oninput="syncSlider8line()"></div>
+    </div>
+    <div class="sr">
+      <label>R (bán kính)</label>
+      <input type="range" id="sl8Rl" min="1" max="10" step="0.1" value="5" oninput="document.getElementById('s8Rl').value=this.value;draw8line()">
+      <span class="sv" id="sv8Rl">5.0</span>
+    </div>
+    <div class="sr">
+      <label>d (khoảng cách)</label>
+      <input type="range" id="sl8dl" min="0" max="10" step="0.1" value="2" oninput="document.getElementById('s8dl').value=this.value;draw8line()">
+      <span class="sv" id="sv8dl">2.0</span>
+    </div>
+    <div style="margin-bottom:16px">
+      <div id="s8lstatus" style="font-family:'DM Mono',monospace;font-size:13px;padding:10px 14px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--a2)">
+        Nhập R và d rồi kéo thanh trượt…
+      </div>
+    </div>
+    <div id="plot8line" style="width:100%;height:520px;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);background:var(--surface);margin-bottom:16px;position:relative">
+      <span style="position:absolute;top:10px;left:12px;font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:2px;text-transform:uppercase;pointer-events:none;z-index:2">Kéo để xoay · Scroll để zoom</span>
+    </div>
+    <div class="rcs">
+      <div class="rc hi"><div class="rl">Dây cung</div><div class="rv" id="r8lchord">—</div><div class="ru">đv dài</div></div>
+      <div class="rc"><div class="rl">Nửa dây cung</div><div class="rv" id="r8lhalf">—</div><div class="ru">đv dài</div></div>
+      <div class="rc"><div class="rl">Trạng thái</div><div class="rv" id="r8lst" style="font-size:13px">—</div></div>
     </div>
   </div>
 </div>
@@ -538,8 +620,218 @@ function preset(t,n){
 function xpng(id,nm){const c=document.getElementById(id);if(!c)return;const a=document.createElement('a');a.download=nm+'.png';a.href=c.toDataURL('image/png');a.click();}
 
 // ── TAB SWITCH ──
-function switchTab(id,btn){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('#maintabs>.tab').forEach(t=>t.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');setTimeout(()=>{const m={t1:()=>draw1(false),t2:()=>draw2(false),t4:()=>draw4(false),t5:()=>draw5(false),t6:()=>draw6()};if(m[id])m[id]();},30);}
+function switchTab(id,btn){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('#maintabs>.tab').forEach(t=>t.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');setTimeout(()=>{const m={t1:()=>draw1(false),t2:()=>draw2(false),t4:()=>draw4(false),t5:()=>draw5(false),t6:()=>draw6(),t8:()=>draw8plane()};if(m[id])m[id]();},30);}
 function switchSub(id,btn){document.querySelectorAll('.sp').forEach(p=>p.classList.remove('active'));document.querySelectorAll('#t7 .tabs .tab').forEach(t=>t.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');}
+function switchSub8(id,btn){document.querySelectorAll('.sp8').forEach(p=>{p.classList.remove('active');p.style.display='none';});document.querySelectorAll('#t8>.tabs>.tab').forEach(t=>t.classList.remove('active'));document.getElementById(id).classList.add('active');document.getElementById(id).style.display='block';btn.classList.add('active');if(id==='s8plane')draw8plane();else draw8line();}
+
+// ── SPHERE HELPERS ──
+function getSphereTraces(R, col) {
+  const N=50, u=[], v=[], x=[], y=[], z=[];
+  for(let i=0;i<=N;i++){u.push([]);v.push([]);x.push([]);y.push([]);z.push([]);}
+  for(let i=0;i<=N;i++){for(let j=0;j<=N;j++){const th=i/N*Math.PI,ph=j/N*2*Math.PI;u[i].push(th);v[i].push(ph);x[i].push(R*Math.sin(th)*Math.cos(ph));y[i].push(R*Math.sin(th)*Math.sin(ph));z[i].push(R*Math.cos(th));}}
+  return {type:'surface',x,y,z,colorscale:[[0,'rgba(108,99,255,0.08)'],[1,'rgba(108,99,255,0.22)']],showscale:false,opacity:0.22,lighting:{ambient:0.5,diffuse:0.8},name:'Mặt cầu R='+R,hoverinfo:'skip'};
+}
+
+function plotlyLayout(col, title) {
+  return {
+    paper_bgcolor:col.pb, plot_bgcolor:col.plb,
+    scene:{
+      bgcolor:col.plb,
+      xaxis:{title:'x',color:col.text,gridcolor:col.grid,zerolinecolor:col.axis,range:[]},
+      yaxis:{title:'y',color:col.text,gridcolor:col.grid,zerolinecolor:col.axis},
+      zaxis:{title:'z',color:col.text,gridcolor:col.grid,zerolinecolor:col.axis},
+      camera:{eye:{x:1.6,y:1.4,z:1.0}},
+      aspectmode:'cube'
+    },
+    margin:{l:0,r:0,t:30,b:0},
+    font:{family:'DM Mono,monospace',color:col.text},
+    title:{text:title,font:{size:13,color:col.text},x:0.5}
+  };
+}
+
+// ── DRAW 8 PLANE ──
+function syncSlider8plane(){
+  const R=parseFloat(document.getElementById('s8R').value)||5;
+  const d=parseFloat(document.getElementById('s8d').value)||0;
+  document.getElementById('sl8R').value=Math.min(Math.max(R,1),10);
+  document.getElementById('sl8d').value=Math.min(Math.max(d,-10),10);
+  draw8plane();
+}
+
+function draw8plane(){
+  const R=parseFloat(document.getElementById('sl8R').value);
+  const d=parseFloat(document.getElementById('sl8d').value);
+  document.getElementById('sv8R').textContent=R.toFixed(1);
+  document.getElementById('sv8d').textContent=d.toFixed(1);
+  document.getElementById('s8R').value=R;
+  document.getElementById('s8d').value=d;
+  const col=C();
+  const traces=[];
+
+  // 1. Sphere (transparent)
+  traces.push(getSphereTraces(R, col));
+
+  // 2. Cutting plane z = d  (show as grid square)
+  const pw=R*1.3;
+  traces.push({
+    type:'mesh3d',
+    x:[-pw,pw,pw,-pw],y:[-pw,-pw,pw,pw],z:[d,d,d,d],
+    i:[0,0],j:[1,2],k:[2,3],
+    color:'rgba(255,209,102,0.18)',opacity:0.35,
+    flatshading:true,showscale:false,name:'Mặt phẳng z='+d.toFixed(2),
+    hoverinfo:'name'
+  });
+  // Plane border
+  traces.push({type:'scatter3d',mode:'lines',x:[-pw,pw,pw,-pw,-pw],y:[-pw,-pw,pw,pw,-pw],z:[d,d,d,d,d],line:{color:'rgba(255,209,102,0.6)',width:2},showlegend:false,hoverinfo:'skip'});
+
+  // 3. Intersection circle or labels
+  const absd=Math.abs(d);
+  let statusText='', statusColor=col.a2||'#00e5b0';
+  if(absd < R) {
+    const r=Math.sqrt(R*R-d*d);
+    const Np=120, cx=[], cy=[], cz=[];
+    for(let i=0;i<=Np;i++){const a2=i/Np*2*Math.PI;cx.push(r*Math.cos(a2));cy.push(r*Math.sin(a2));cz.push(d);}
+    // Filled disk (neon)
+    const dx2=[], dy2=[], dz2=[], ii2=[], jj2=[], kk2=[];
+    for(let i=0;i<Np;i++){dx2.push(0);dy2.push(0);dz2.push(d);}
+    for(let i=0;i<Np;i++){dx2.push(r*Math.cos(i/Np*2*Math.PI));dy2.push(r*Math.sin(i/Np*2*Math.PI));dz2.push(d);}
+    for(let i=0;i<Np-1;i++){ii2.push(i%Np);jj2.push(Np+i);kk2.push(Np+i+1);}
+    traces.push({type:'mesh3d',x:dx2,y:dy2,z:dz2,i:ii2,j:jj2,k:kk2,color:'rgba(0,229,176,0.28)',opacity:0.55,flatshading:true,showscale:false,name:'Thiết diện',hoverinfo:'name'});
+    // Neon circle outline
+    traces.push({type:'scatter3d',mode:'lines',x:cx,y:cy,z:cz,line:{color:'#00e5b0',width:8},name:'Đường tròn r='+r.toFixed(3),hoverinfo:'name'});
+    // Radius annotation line
+    traces.push({type:'scatter3d',mode:'lines+text',x:[0,r],y:[0,0],z:[d,d],line:{color:'#ffd166',width:4,dash:'dot'},text:['','r='+r.toFixed(3)],textposition:'middle right',textfont:{color:'#ffd166',size:12},showlegend:false,hoverinfo:'skip'});
+    // Center dot on plane
+    traces.push({type:'scatter3d',mode:'markers+text',x:[0],y:[0],z:[d],marker:{color:'#ff6b6b',size:6},text:['O\''],textposition:'top center',textfont:{color:'#ff6b6b',size:11},showlegend:false,hoverinfo:'skip'});
+
+    statusText=`✅ CẮT NHAU: r = √(${R}²−${d.toFixed(1)}²) = ${r.toFixed(4)}`;
+    statusColor='#00e5b0';
+    document.getElementById('r8r').textContent=r.toFixed(5);
+    document.getElementById('r8a').textContent=(Math.PI*r*r).toFixed(5);
+    document.getElementById('r8c').textContent=(2*Math.PI*r).toFixed(5);
+    document.getElementById('r8st').textContent='Cắt nhau';
+    document.getElementById('r8st').style.color='#00e5b0';
+  } else if(absd===R) {
+    traces.push({type:'scatter3d',mode:'markers+text',x:[0],y:[0],z:[d],marker:{color:'#ffd166',size:10},text:['Tiếp xúc'],textposition:'top center',textfont:{color:'#ffd166',size:12},showlegend:false});
+    statusText=`🟡 TIẾP XÚC: d = R = ${R} → đường tròn suy biến (1 điểm)`;
+    statusColor='#ffd166';
+    document.getElementById('r8r').textContent='0';
+    document.getElementById('r8a').textContent='0';
+    document.getElementById('r8c').textContent='0';
+    document.getElementById('r8st').textContent='Tiếp xúc';
+    document.getElementById('r8st').style.color='#ffd166';
+  } else {
+    statusText=`❌ KHÔNG CẮT: |d| = ${absd.toFixed(2)} > R = ${R} → không có giao điểm`;
+    statusColor='#ff6b6b';
+    document.getElementById('r8r').textContent='—';
+    document.getElementById('r8a').textContent='—';
+    document.getElementById('r8c').textContent='—';
+    document.getElementById('r8st').textContent='Không cắt';
+    document.getElementById('r8st').style.color='#ff6b6b';
+  }
+
+  // Axes through center
+  const ax=R*1.1;
+  traces.push({type:'scatter3d',mode:'lines',x:[-ax,ax],y:[0,0],z:[0,0],line:{color:'rgba(255,100,100,0.5)',width:2},showlegend:false,hoverinfo:'skip'});
+  traces.push({type:'scatter3d',mode:'lines',x:[0,0],y:[-ax,ax],z:[0,0],line:{color:'rgba(100,255,100,0.5)',width:2},showlegend:false,hoverinfo:'skip'});
+  traces.push({type:'scatter3d',mode:'lines',x:[0,0],y:[0,0],z:[-ax,ax],line:{color:'rgba(100,100,255,0.5)',width:2},showlegend:false,hoverinfo:'skip'});
+  // d label on z-axis
+  traces.push({type:'scatter3d',mode:'markers+text',x:[0],y:[0],z:[d],marker:{color:'rgba(255,209,102,0.0)',size:1},text:['  d='+d.toFixed(2)],textposition:'middle right',textfont:{color:'#ffd166',size:11},showlegend:false,hoverinfo:'skip'});
+
+  document.getElementById('s8status').textContent=statusText;
+  document.getElementById('s8status').style.color=statusColor;
+
+  const layout=plotlyLayout(col, `Mặt cầu R=${R} cắt mặt phẳng z=${d.toFixed(2)}`);
+  layout.scene.zaxis.range=[-R*1.3, R*1.3];
+  layout.scene.xaxis.range=[-R*1.3, R*1.3];
+  layout.scene.yaxis={...layout.scene.yaxis, range:[-R*1.3, R*1.3]};
+  Plotly.react('plot8plane', traces, layout, {responsive:true, displayModeBar:false});
+}
+
+// ── DRAW 8 LINE ──
+function syncSlider8line(){
+  const R=parseFloat(document.getElementById('s8Rl').value)||5;
+  const d=parseFloat(document.getElementById('s8dl').value)||0;
+  document.getElementById('sl8Rl').value=Math.min(Math.max(R,1),10);
+  document.getElementById('sl8dl').value=Math.min(Math.max(d,0),10);
+  draw8line();
+}
+
+function draw8line(){
+  const R=parseFloat(document.getElementById('sl8Rl').value);
+  const d=parseFloat(document.getElementById('sl8dl').value);
+  document.getElementById('sv8Rl').textContent=R.toFixed(1);
+  document.getElementById('sv8dl').textContent=d.toFixed(1);
+  document.getElementById('s8Rl').value=R;
+  document.getElementById('s8dl').value=d;
+  const col=C();
+  const traces=[];
+
+  // Sphere
+  traces.push(getSphereTraces(R, col));
+
+  // Line: runs along x-axis, offset in y by d
+  const lt=R*1.4;
+  traces.push({type:'scatter3d',mode:'lines',x:[-lt,lt],y:[d,d],z:[0,0],line:{color:'#ffd166',width:5},name:'Đường thẳng (d='+d.toFixed(2)+')',hoverinfo:'name'});
+
+  // Perpendicular from center to line
+  if(d>0.001){
+    traces.push({type:'scatter3d',mode:'lines+text',x:[0,0],y:[0,d],z:[0,0],line:{color:'rgba(255,209,102,0.5)',width:3,dash:'dot'},text:['','d='+d.toFixed(2)],textposition:'middle right',textfont:{color:'#ffd166',size:11},showlegend:false,hoverinfo:'skip'});
+  }
+
+  let statusText='', statusColor=col.a2||'#00e5b0';
+  if(d < R) {
+    const half=Math.sqrt(R*R - d*d);
+    const chord=2*half;
+    // Intersection points
+    const P1=[-half, d, 0], P2=[half, d, 0];
+    traces.push({type:'scatter3d',mode:'markers+text',x:[P1[0],P2[0]],y:[P1[1],P2[1]],z:[P1[2],P2[2]],marker:{color:'#00e5b0',size:8,symbol:'circle'},text:['A','B'],textposition:['top center','top center'],textfont:{color:'#00e5b0',size:13},name:'Giao điểm A, B',hoverinfo:'name'});
+    // Chord line highlight
+    traces.push({type:'scatter3d',mode:'lines',x:[P1[0],P2[0]],y:[P1[1],P2[1]],z:[P1[2],P2[2]],line:{color:'#00e5b0',width:9},showlegend:false,hoverinfo:'skip'});
+    // Arc on sphere showing the chord
+    const Np=80, arcx=[], arcy=[], arcz=[];
+    const a1=Math.atan2(d, -half), a2=Math.atan2(d, half);
+    for(let i=0;i<=Np;i++){const a3=a1+(a2-a1)*i/Np;arcx.push(R*Math.cos(a3));arcy.push(R*Math.sin(a3));arcz.push(0);}
+    traces.push({type:'scatter3d',mode:'lines',x:arcx,y:arcy,z:arcz,line:{color:'rgba(0,229,176,0.5)',width:4},showlegend:false,hoverinfo:'skip'});
+
+    statusText=`✅ CẮT 2 ĐIỂM: dây cung = 2√(${R}²−${d.toFixed(1)}²) = ${chord.toFixed(4)}`;
+    statusColor='#00e5b0';
+    document.getElementById('r8lchord').textContent=chord.toFixed(5);
+    document.getElementById('r8lhalf').textContent=half.toFixed(5);
+    document.getElementById('r8lst').textContent='Cắt 2 điểm';
+    document.getElementById('r8lst').style.color='#00e5b0';
+  } else if(Math.abs(d-R)<0.001) {
+    traces.push({type:'scatter3d',mode:'markers+text',x:[0],y:[R],z:[0],marker:{color:'#ffd166',size:9},text:['Tiếp điểm'],textposition:'top center',textfont:{color:'#ffd166',size:12},showlegend:false});
+    statusText=`🟡 TIẾP XÚC: d = R = ${R} → 1 điểm chung`;
+    statusColor='#ffd166';
+    document.getElementById('r8lchord').textContent='0';
+    document.getElementById('r8lhalf').textContent='0';
+    document.getElementById('r8lst').textContent='Tiếp xúc';
+    document.getElementById('r8lst').style.color='#ffd166';
+  } else {
+    statusText=`❌ KHÔNG CẮT: d = ${d.toFixed(2)} > R = ${R}`;
+    statusColor='#ff6b6b';
+    document.getElementById('r8lchord').textContent='—';
+    document.getElementById('r8lhalf').textContent='—';
+    document.getElementById('r8lst').textContent='Không cắt';
+    document.getElementById('r8lst').style.color='#ff6b6b';
+  }
+
+  // Axes
+  const ax=R*1.1;
+  traces.push({type:'scatter3d',mode:'lines',x:[-ax,ax],y:[0,0],z:[0,0],line:{color:'rgba(255,100,100,0.4)',width:2},showlegend:false,hoverinfo:'skip'});
+  traces.push({type:'scatter3d',mode:'lines',x:[0,0],y:[-ax,ax],z:[0,0],line:{color:'rgba(100,255,100,0.4)',width:2},showlegend:false,hoverinfo:'skip'});
+  traces.push({type:'scatter3d',mode:'lines',x:[0,0],y:[0,0],z:[-ax,ax],line:{color:'rgba(100,100,255,0.4)',width:2},showlegend:false,hoverinfo:'skip'});
+
+  document.getElementById('s8lstatus').textContent=statusText;
+  document.getElementById('s8lstatus').style.color=statusColor;
+
+  const layout=plotlyLayout(col, `Mặt cầu R=${R} cắt đường thẳng (d=${d.toFixed(2)})`);
+  layout.scene.zaxis.range=[-R*1.3, R*1.3];
+  layout.scene.xaxis.range=[-R*1.3, R*1.3];
+  layout.scene.yaxis={...layout.scene.yaxis, range:[-R*1.3, R*1.3]};
+  Plotly.react('plot8line', traces, layout, {responsive:true, displayModeBar:false});
+}
 
 window.addEventListener('load',()=>{draw1(false);zp('c1',()=>draw1(false));});
 </script>
